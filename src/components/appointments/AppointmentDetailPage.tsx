@@ -11,6 +11,7 @@ import { Toaster } from 'react-hot-toast'
 import { useState } from 'react'
 
 type Appointment = Database['public']['Tables']['appointments']['Row']
+type AppointmentUpdate = Database['public']['Tables']['appointments']['Update']
 type Client = Database['public']['Tables']['clients']['Row']
 
 const statusColors = {
@@ -48,8 +49,8 @@ export default function AppointmentDetailPage({
   ) {
     setLoading(true)
     try {
-      const { error } = await supabase
-        .from('appointments')
+      const { error } = await (supabase
+        .from('appointments') as any)
         .update({ status: newStatus })
         .eq('id', appointment.id)
 
