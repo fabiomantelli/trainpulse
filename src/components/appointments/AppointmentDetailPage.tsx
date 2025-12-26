@@ -92,13 +92,13 @@ export default function AppointmentDetailPage({
   return (
     <>
       <Toaster position="top-right" />
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
             <button
               onClick={() => router.back()}
-              className="text-gray-600 hover:text-gray-900 mb-4 flex items-center gap-2"
+              className="text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 mb-4 flex items-center gap-2"
             >
               <svg
                 className="w-5 h-5"
@@ -115,14 +115,14 @@ export default function AppointmentDetailPage({
               </svg>
               Back to Appointments
             </button>
-            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900">Appointment Details</h1>
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-slate-100">Appointment Details</h1>
           </div>
 
           {/* Main Card */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-2xl shadow-xl overflow-hidden"
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden"
           >
             {/* Status Header */}
             <div
@@ -131,15 +131,15 @@ export default function AppointmentDetailPage({
 
             <div className="p-6 md:p-8">
               {/* Client Info */}
-              <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-200">
+              <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-200 dark:border-slate-700">
                 {client.photo_url ? (
                   <img
                     src={client.photo_url}
                     alt={client.name}
-                    className="w-20 h-20 rounded-full object-cover ring-4 ring-gray-100"
+                    className="w-20 h-20 rounded-full object-cover ring-4 ring-gray-100 dark:ring-slate-700"
                   />
                 ) : (
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center ring-4 ring-gray-100">
+                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center ring-4 ring-gray-100 dark:ring-slate-700">
                     <span className="text-white font-bold text-2xl">
                       {client.name.charAt(0).toUpperCase()}
                     </span>
@@ -148,15 +148,15 @@ export default function AppointmentDetailPage({
                 <div className="flex-1">
                   <Link
                     href={`/clients/${client.id}`}
-                    className="text-2xl font-bold text-gray-900 hover:text-blue-600 transition-colors"
+                    className="text-2xl font-bold text-gray-900 dark:text-slate-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                   >
                     {client.name}
                   </Link>
                   {client.email && (
-                    <p className="text-gray-600 mt-1">{client.email}</p>
+                    <p className="text-gray-600 dark:text-slate-400 mt-1">{client.email}</p>
                   )}
                   {client.phone && (
-                    <p className="text-gray-600">{client.phone}</p>
+                    <p className="text-gray-600 dark:text-slate-400">{client.phone}</p>
                   )}
                 </div>
                 <span
@@ -169,32 +169,32 @@ export default function AppointmentDetailPage({
               {/* Appointment Details */}
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 <div>
-                  <label className="text-sm font-medium text-gray-500 mb-1 block">
+                  <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1 block">
                     Date & Time
                   </label>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-gray-900 dark:text-slate-100">
                     {format(scheduledDate, 'EEEE, MMMM d, yyyy')}
                   </p>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 dark:text-slate-400">
                     {format(scheduledDate, 'h:mm a')} - {format(endTime, 'h:mm a')}
                   </p>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-gray-500 mb-1 block">
+                  <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1 block">
                     Duration
                   </label>
-                  <p className="text-lg font-semibold text-gray-900">
+                  <p className="text-lg font-semibold text-gray-900 dark:text-slate-100">
                     {appointment.duration_minutes} minutes
                   </p>
                 </div>
 
                 {appointment.notes && (
                   <div className="md:col-span-2">
-                    <label className="text-sm font-medium text-gray-500 mb-1 block">
+                    <label className="text-sm font-medium text-gray-500 dark:text-slate-400 mb-1 block">
                       Notes
                     </label>
-                    <p className="text-gray-900 whitespace-pre-wrap bg-gray-50 p-4 rounded-lg">
+                    <p className="text-gray-900 dark:text-slate-100 whitespace-pre-wrap bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg">
                       {appointment.notes}
                     </p>
                   </div>
@@ -202,7 +202,7 @@ export default function AppointmentDetailPage({
               </div>
 
               {/* Actions */}
-              <div className="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
+              <div className="flex flex-wrap gap-3 pt-6 border-t border-gray-200 dark:border-slate-700">
                 <Link
                   href={`/appointments/${appointment.id}/edit`}
                   className="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"

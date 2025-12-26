@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { format, formatDistanceToNow, isToday, isTomorrow, addHours, isBefore, differenceInHours, differenceInDays } from 'date-fns'
 import { Database } from '@/types/database.types'
@@ -21,11 +21,81 @@ export interface NotificationItem {
   href?: string
 }
 
+const STORAGE_KEY_PREFIX = 'notifications_read_'
+
 export function useNotifications(trainerId: string | null) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const readRealTimeIdsRef = useRef<Set<string>>(new Set())
   const supabase = createClient()
+
+  // Load persisted read notification IDs from localStorage
+  useEffect(() => {
+    if (trainerId && typeof window !== 'undefined') {
+      try {
+        const storageKey = `${STORAGE_KEY_PREFIX}${trainerId}`
+        const stored = localStorage.getItem(storageKey)
+        if (stored) {
+          const data = JSON.parse(stored)
+          // Support both old format (array) and new format (object with ids)
+          const ids = Array.isArray(data) ? data : (data.ids || [])
+          readRealTimeIdsRef.current = new Set(ids)
+          
+          // Clean up entries older than 30 days
+          if (data.lastUpdated && Date.now() - data.lastUpdated > 30 * 24 * 60 * 60 * 1000) {
+            readRealTimeIdsRef.current.clear()
+            localStorage.removeItem(storageKey)
+          }
+        }
+      } catch (error) {
+        console.error('Error loading read notifications from localStorage:', error)
+        // If there's a parsing error, clear the corrupted data
+        try {
+          const storageKey = `${STORAGE_KEY_PREFIX}${trainerId}`
+          localStorage.removeItem(storageKey)
+        } catch (clearError) {
+          // Ignore clear errors
+        }
+      }
+    }
+  }, [trainerId])
+
+  // Helper to save read notification IDs to localStorage
+  const persistReadIds = useCallback(() => {
+    if (trainerId && typeof window !== 'undefined') {
+      try {
+        const storageKey = `${STORAGE_KEY_PREFIX}${trainerId}`
+        const ids = Array.from(readRealTimeIdsRef.current)
+        // Store with timestamp for cleanup purposes
+        const data = {
+          ids,
+          lastUpdated: Date.now(),
+        }
+        localStorage.setItem(storageKey, JSON.stringify(data))
+        
+        // Clean up old entries periodically (keep only last 1000 IDs to prevent bloat)
+        if (ids.length > 1000) {
+          const trimmedIds = ids.slice(-1000)
+          readRealTimeIdsRef.current = new Set(trimmedIds)
+          localStorage.setItem(storageKey, JSON.stringify({ ids: trimmedIds, lastUpdated: Date.now() }))
+        }
+      } catch (error) {
+        console.error('Error saving read notifications to localStorage:', error)
+        // If localStorage is full, try to clean up
+        if (error instanceof DOMException && error.code === 22) {
+          try {
+            const storageKey = `${STORAGE_KEY_PREFIX}${trainerId}`
+            const ids = Array.from(readRealTimeIdsRef.current).slice(-500)
+            readRealTimeIdsRef.current = new Set(ids)
+            localStorage.setItem(storageKey, JSON.stringify({ ids, lastUpdated: Date.now() }))
+          } catch (cleanupError) {
+            console.error('Error cleaning up localStorage:', cleanupError)
+          }
+        }
+      }
+    }
+  }, [trainerId])
 
   const calculateRealTimeNotifications = useCallback(async (): Promise<NotificationItem[]> => {
     if (!trainerId) return []
@@ -189,8 +259,9 @@ export function useNotifications(trainerId: string | null) {
       const seenIds = new Set<string>()
 
       // Add real-time notifications first (they're more important)
+      // Filter out ones that have been marked as read
       realTimeNotifications.forEach((notif) => {
-        if (!seenIds.has(notif.id)) {
+        if (!seenIds.has(notif.id) && !readRealTimeIdsRef.current.has(notif.id)) {
           allNotifications.push(notif)
           seenIds.add(notif.id)
         }
@@ -227,8 +298,16 @@ export function useNotifications(trainerId: string | null) {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       })
 
-      setNotifications(allNotifications)
-      setUnreadCount(allNotifications.filter((n) => !n.isRead).length)
+      // Filter out read real-time notifications from final list
+      const filteredNotifications = allNotifications.filter((n) => {
+        if (n.id.startsWith('appt-') || n.id.startsWith('invoice-')) {
+          return !readRealTimeIdsRef.current.has(n.id)
+        }
+        return true
+      })
+      
+      setNotifications(filteredNotifications)
+      setUnreadCount(filteredNotifications.filter((n) => !n.isRead).length)
     } catch (error) {
       console.error('Error fetching notifications:', error)
     } finally {
@@ -240,13 +319,16 @@ export function useNotifications(trainerId: string | null) {
     async (notificationId: string) => {
       // Check if it's a real-time notification (starts with prefix)
       if (notificationId.startsWith('appt-') || notificationId.startsWith('invoice-')) {
-        // For real-time notifications, just update local state
-        setNotifications((prev) =>
-          prev.map((n) =>
-            n.id === notificationId ? { ...n, isRead: true, readAt: new Date().toISOString() } : n
-          )
-        )
-        setUnreadCount((prev) => Math.max(0, prev - 1))
+        // For real-time notifications, mark as read and add to read set
+        readRealTimeIdsRef.current.add(notificationId)
+        persistReadIds() // Persist to localStorage
+        setNotifications((prev) => {
+          const updated = prev.filter((n) => n.id !== notificationId)
+          // Recalculate unread count
+          const newUnreadCount = updated.filter((n) => !n.isRead).length
+          setUnreadCount(newUnreadCount)
+          return updated
+        })
         return
       }
 
@@ -257,41 +339,50 @@ export function useNotifications(trainerId: string | null) {
         .eq('trainer_id', trainerId!)
 
       if (!error) {
-        setNotifications((prev) =>
-          prev.map((n) =>
+        setNotifications((prev) => {
+          const updated = prev.map((n) =>
             n.id === notificationId ? { ...n, isRead: true, readAt: new Date().toISOString() } : n
           )
-        )
-        setUnreadCount((prev) => Math.max(0, prev - 1))
+          // Recalculate unread count
+          const newUnreadCount = updated.filter((n) => !n.isRead).length
+          setUnreadCount(newUnreadCount)
+          return updated
+        })
       }
     },
-    [trainerId, supabase]
+    [trainerId, supabase, persistReadIds]
   )
 
   const markAllAsRead = useCallback(async () => {
     if (!trainerId) return
 
-    // Mark all stored unread notifications
-    const unreadStored = notifications.filter((n) => !n.isRead && !n.id.startsWith('appt-') && !n.id.startsWith('invoice-'))
-    
-    if (unreadStored.length > 0) {
-      const { error } = await (supabase.from('notifications') as any)
-        .update({ read_at: new Date().toISOString() })
-        .eq('trainer_id', trainerId)
-        .is('read_at', null)
+    // Mark all stored unread notifications in database
+    const { error } = await (supabase.from('notifications') as any)
+      .update({ read_at: new Date().toISOString() })
+      .eq('trainer_id', trainerId)
+      .is('read_at', null)
 
-      if (error) {
-        console.error('Error marking all as read:', error)
-        return
-      }
+    if (error) {
+      console.error('Error marking all as read:', error)
+      return
     }
 
-    // Update local state for all notifications
-    setNotifications((prev) =>
-      prev.map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() }))
-    )
-    setUnreadCount(0)
-  }, [trainerId, supabase, notifications])
+    // Mark all real-time notifications as read
+    setNotifications((prev) => {
+      const realTimeIds = prev
+        .filter((n) => n.id.startsWith('appt-') || n.id.startsWith('invoice-'))
+        .map((n) => n.id)
+      // Add all real-time notification IDs to the read set
+      realTimeIds.forEach((id) => readRealTimeIdsRef.current.add(id))
+      persistReadIds() // Persist to localStorage
+      // Remove all real-time notifications and update stored ones
+      const updated = prev
+        .filter((n) => !n.id.startsWith('appt-') && !n.id.startsWith('invoice-'))
+        .map((n) => ({ ...n, isRead: true, readAt: new Date().toISOString() }))
+      setUnreadCount(0)
+      return updated
+    })
+  }, [trainerId, supabase, persistReadIds])
 
   useEffect(() => {
     if (trainerId) {

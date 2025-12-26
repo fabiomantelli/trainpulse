@@ -5,6 +5,8 @@ import { Database } from '@/types/database.types'
 
 type Appointment = Database['public']['Tables']['appointments']['Row']
 
+export const dynamic = 'force-dynamic'
+
 export default async function AppointmentDetail({
   params,
 }: {

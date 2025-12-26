@@ -2,6 +2,8 @@ import { createServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import EditAppointmentPage from '@/components/appointments/EditAppointmentPage'
 
+export const dynamic = 'force-dynamic'
+
 export default async function EditAppointment({
   params,
 }: {
