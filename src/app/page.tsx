@@ -2,7 +2,27 @@ import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 
-export default async function Home() {
+export const dynamic = 'force-dynamic'
+
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { code?: string | string[]; [key: string]: string | string[] | undefined }
+}) {
+  // #region agent log
+  const code = Array.isArray(searchParams?.code) ? searchParams.code[0] : searchParams?.code
+  const allParams = Object.fromEntries(Object.entries(searchParams || {}))
+  fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/page.tsx:10',message:'Home page loaded with searchParams',data:{hasCode:!!code,codeValue:typeof code === 'string' ? code.substring(0,20)+'...' : 'N/A',allParams,paramCount:Object.keys(searchParams || {}).length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+  // #endregion
+
+  // If code parameter is present, redirect to /auth/callback to handle authentication
+  if (code && typeof code === 'string') {
+    // #region agent log
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/page.tsx:16',message:'Code found in root, redirecting to /auth/callback',data:{codeValue:code.substring(0,20)+'...',redirectUrl:'/auth/callback?code='+encodeURIComponent(code)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    redirect(`/auth/callback?code=${encodeURIComponent(code)}`)
+  }
+
   const supabase = createServerClient()
   const {
     data: { user },

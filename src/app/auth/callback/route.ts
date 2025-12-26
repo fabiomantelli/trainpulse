@@ -17,7 +17,10 @@ export async function GET(request: NextRequest) {
 
     // #region agent log
     const allParams = Object.fromEntries(requestUrl.searchParams.entries())
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:11',message:'Callback route called',data:{requestUrl:request.url,origin,host:requestUrl.host,protocol:requestUrl.protocol,code:!!code,token:!!token,type,next,envAppUrl:process.env.NEXT_PUBLIC_APP_URL,allParams},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    const headers = Object.fromEntries(request.headers.entries())
+    const referer = request.headers.get('referer') || 'no-referer'
+    const userAgent = request.headers.get('user-agent') || 'no-user-agent'
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:11',message:'Callback route called - DETAILED',data:{requestUrl:request.url,fullUrl:requestUrl.href,pathname:requestUrl.pathname,search:requestUrl.search,hash:requestUrl.hash,origin,host:requestUrl.host,hostname:requestUrl.hostname,protocol:requestUrl.protocol,port:requestUrl.port,code:!!code,codeValue:code?.substring(0,20)+'...',token:!!token,tokenValue:token?.substring(0,20)+'...',type,next,envAppUrl:process.env.NEXT_PUBLIC_APP_URL,allParams,paramCount:Object.keys(allParams).length,referer,userAgentShort:userAgent.substring(0,50),hasCookies:!!request.headers.get('cookie'),cookieCount:request.headers.get('cookie')?.split(';').length||0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
 
     // Create Supabase client with proper cookie handling
@@ -135,12 +138,11 @@ export async function GET(request: NextRequest) {
 
     // No code, no token, no session - redirect to signin with error
     // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:105',message:'No authentication method found',data:{origin,allParams},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    const redirectUrl = new URL(`/auth/signin?error=${encodeURIComponent('No authentication code provided. Please click the confirmation link from your email.')}`, origin)
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:105',message:'No authentication method found - REDIRECTING TO SIGNIN',data:{origin,requestUrl:request.url,allParams,paramCount:Object.keys(allParams).length,redirectUrl:redirectUrl.href,hasCode:!!code,hasToken:!!token,hasType:!!type,pathname:requestUrl.pathname},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
     
-    return NextResponse.redirect(
-      new URL(`/auth/signin?error=${encodeURIComponent('No authentication code provided. Please click the confirmation link from your email.')}`, origin)
-    )
+    return NextResponse.redirect(redirectUrl)
   } catch (error) {
     console.error('Unexpected error in callback:', error)
     const requestUrl = new URL(request.url)
