@@ -40,13 +40,25 @@ export default function SignUpPage() {
     // #endregion
 
     try {
-      // Get the current origin (production URL or localhost in dev)
-      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      // Get the current origin - prioritize NEXT_PUBLIC_APP_URL, then window.location, then fallback
+      let currentOrigin = 'http://localhost:3000'
+      if (typeof window !== 'undefined') {
+        // In browser: use NEXT_PUBLIC_APP_URL if set, otherwise use window.location.origin
+        currentOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      } else {
+        // Server-side: use NEXT_PUBLIC_APP_URL
+        currentOrigin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      }
+      
+      // Remove trailing slash if present
+      currentOrigin = currentOrigin.replace(/\/$/, '')
       const emailRedirectTo = `${currentOrigin}/auth/callback`
       
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:42',message:'SignUp with emailRedirectTo',data:{currentOrigin,emailRedirectTo,envAppUrl:process.env.NEXT_PUBLIC_APP_URL},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:42',message:'SignUp with emailRedirectTo',data:{currentOrigin,emailRedirectTo,envAppUrl:process.env.NEXT_PUBLIC_APP_URL,windowOrigin:typeof window !== 'undefined' ? window.location.origin : 'N/A',isBrowser:typeof window !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
+      
+      console.log('🔗 Email Redirect URL:', { currentOrigin, emailRedirectTo, envAppUrl: process.env.NEXT_PUBLIC_APP_URL })
 
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -176,14 +188,26 @@ export default function SignUpPage() {
     setResendingEmail(true)
     setError(null)
     try {
-      // Get the current origin (production URL or localhost in dev)
-      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      // Get the current origin - prioritize NEXT_PUBLIC_APP_URL, then window.location, then fallback
+      let currentOrigin = 'http://localhost:3000'
+      if (typeof window !== 'undefined') {
+        // In browser: use NEXT_PUBLIC_APP_URL if set, otherwise use window.location.origin
+        currentOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+      } else {
+        // Server-side: use NEXT_PUBLIC_APP_URL
+        currentOrigin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      }
+      
+      // Remove trailing slash if present
+      currentOrigin = currentOrigin.replace(/\/$/, '')
       const emailRedirectTo = `${currentOrigin}/auth/callback`
       
       console.log('📧 Resending verification email to:', email)
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:155',message:'Resend email with redirectTo',data:{email,emailRedirectTo,currentOrigin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:155',message:'Resend email with redirectTo',data:{email,emailRedirectTo,currentOrigin,envAppUrl:process.env.NEXT_PUBLIC_APP_URL,windowOrigin:typeof window !== 'undefined' ? window.location.origin : 'N/A'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
+      
+      console.log('🔗 Email Redirect URL (resend):', { currentOrigin, emailRedirectTo, envAppUrl: process.env.NEXT_PUBLIC_APP_URL })
       
       const { data, error: resendError } = await supabase.auth.resend({
         type: 'signup',
