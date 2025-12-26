@@ -1,0 +1,455 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: #f9fafb;
+  width: 100%;
+  overflow-x: hidden;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.dark body {
+  background: #0f172a; /* slate-950 - warm dark background */
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Smooth animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+  
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+  
+  /* Glassmorphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  
+  .dark .glass {
+    background: rgba(30, 41, 59, 0.8); /* slate-800 with transparency */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  /* Gradient text - TrainPulse brand gradient */
+  .gradient-text {
+    background: linear-gradient(135deg, #2563eb 0%, #9333ea 50%, #db2777 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Pulse animation for premium feel */
+  @keyframes pulse-glow {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+    }
+    50% {
+      opacity: 0.8;
+      box-shadow: 0 0 30px rgba(147, 51, 234, 0.5);
+    }
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+  
+  /* Custom scrollbar styling */
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(156, 163, 175, 0.5);
+    border-radius: 4px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(156, 163, 175, 0.7);
+  }
+  
+  .dark .custom-scrollbar {
+    scrollbar-color: rgba(100, 116, 139, 0.5) transparent;
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 116, 139, 0.5);
+  }
+  
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(100, 116, 139, 0.7);
+  }
+  
+  /* Recharts Tooltip and Legend dark mode styles */
+  .recharts-tooltip-wrapper {
+    z-index: 1000;
+  }
+  
+  .recharts-legend-wrapper {
+    color: rgb(17, 24, 39);
+  }
+  
+  .dark .recharts-legend-wrapper {
+    color: rgb(248, 250, 252);
+  }
+  
+  .recharts-legend-item {
+    color: inherit;
+  }
+  
+  .recharts-legend-item-text {
+    color: inherit !important;
+  }
+  
+  /* Remove hover background on Recharts bars */
+  .recharts-active-bar {
+    fill-opacity: 1 !important;
+  }
+  
+  .recharts-bar-rectangle:hover {
+    fill-opacity: 1 !important;
+  }
+  
+  .recharts-active-shape {
+    fill-opacity: 1 !important;
+  }
+  
+  /* Remove background highlight on bar hover */
+  .recharts-bar:hover {
+    opacity: 1 !important;
+  }
+  
+  .recharts-bar .recharts-bar-rectangle {
+    fill-opacity: 1 !important;
+  }
+  
+  .recharts-active-bar .recharts-bar-rectangle {
+    fill-opacity: 1 !important;
+  }
+  
+  /* Remove any background highlight from bar chart area */
+  .recharts-bar-chart .recharts-wrapper {
+    background: transparent !important;
+  }
+  
+  .recharts-bar-chart .recharts-surface {
+    background: transparent !important;
+  }
+  
+  /* Remove tooltip cursor overlay (the white/gray rectangle on hover) */
+  .recharts-tooltip-cursor {
+    fill: transparent !important;
+    stroke: none !important;
+  }
+  
+  /* Remove any overlay background from active bar */
+  .recharts-active-bar-area {
+    fill: transparent !important;
+    stroke: none !important;
+  }
+}
+
+/* React Day Picker Styles */
+.rdp {
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #3b82f6;
+  --rdp-background-color: #eff6ff;
+  --rdp-accent-color-dark: #1e40af;
+  --rdp-background-color-dark: #1e3a8a;
+  --rdp-outline: 2px solid var(--rdp-accent-color);
+  --rdp-outline-selected: 3px solid var(--rdp-accent-color);
+  margin: 0;
+}
+
+.rdp-button_reset {
+  appearance: none;
+  position: relative;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+  color: inherit;
+  border: none;
+  background-color: transparent;
+  font: inherit;
+}
+
+.rdp-button {
+  border: 2px solid transparent;
+}
+
+.rdp-button[disabled] {
+  opacity: 0.25;
+}
+
+.rdp-button:not([disabled]) {
+  cursor: pointer;
+}
+
+.rdp-button:focus:not([disabled]),
+.rdp-button:active:not([disabled]) {
+  color: inherit;
+  border: var(--rdp-outline);
+  background-color: var(--rdp-background-color);
+}
+
+.rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
+  background-color: var(--rdp-background-color);
+}
+
+.rdp-months {
+  display: flex;
+}
+
+.rdp-month {
+  margin: 0 1em;
+}
+
+.rdp-month:first-child {
+  margin-left: 0;
+}
+
+.rdp-month:last-child {
+  margin-right: 0;
+}
+
+.rdp-table {
+  width: 100%;
+  max-width: calc(var(--rdp-cell-size) * 7);
+  border-collapse: collapse;
+}
+
+.rdp-with_weeknumber .rdp-table {
+  max-width: calc(var(--rdp-cell-size) * 8);
+  border-collapse: collapse;
+}
+
+.rdp-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  text-align: left;
+}
+
+.rdp-multiple_months .rdp-caption {
+  position: relative;
+  display: block;
+  text-align: center;
+}
+
+.rdp-caption_label {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 0.25em;
+  white-space: nowrap;
+  color: currentColor;
+  border: 0;
+  border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 1.25em;
+  font-weight: 600;
+}
+
+.rdp-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 1em;
+}
+
+.rdp-multiple_months .rdp-caption_start .rdp-nav {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+}
+
+.rdp-multiple_months .rdp-caption_end .rdp-nav {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.rdp-nav_button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--rdp-cell-size);
+  height: var(--rdp-cell-size);
+  padding: 0.25rem;
+  border-radius: 100%;
+}
+
+.rdp-nav_button:hover {
+  background-color: var(--rdp-background-color);
+}
+
+.rdp-nav_button:focus:not([disabled]) {
+  color: inherit;
+  border: var(--rdp-outline);
+  background-color: var(--rdp-background-color);
+}
+
+.rdp-nav_icon {
+  width: 1em;
+  height: 1em;
+}
+
+.rdp-nav_button_next {
+  margin-left: auto;
+}
+
+.rdp-table_head {
+  vertical-align: middle;
+}
+
+.rdp-table_head_row {
+  display: flex;
+  flex-flow: row wrap;
+}
+
+.rdp-table_head_cell {
+  flex: 1 1;
+  min-width: 0;
+  padding: 0;
+  font-size: 0.75em;
+  font-weight: 700;
+  text-align: center;
+  color: #6b7280;
+}
+
+.rdp-table_body {
+  border: 0;
+}
+
+.rdp-table_body_row {
+  display: flex;
+  flex-flow: row wrap;
+  width: 100%;
+}
+
+.rdp-weeknumber {
+  font-size: 0.75em;
+  font-weight: 700;
+  min-width: var(--rdp-cell-size);
+  padding: 0.5rem;
+  border-right: 1px solid #e5e7eb;
+}
+
+.rdp-day {
+  width: 100%;
+  min-width: 0;
+  font-size: 0.875rem;
+  flex: 1 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  height: var(--rdp-cell-size);
+  padding: 0;
+  text-align: center;
+  cursor: default;
+}
+
+.rdp-day_today:not(.rdp-day_outside) {
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.rdp-day_selected,
+.rdp-day_selected:focus-visible,
+.rdp-day_selected:hover {
+  color: white;
+  opacity: 1;
+  background-color: var(--rdp-accent-color);
+  border: var(--rdp-outline-selected);
+}
+
+.rdp-day_outside {
+  color: #9ca3af;
+  opacity: 0.5;
+}
+
+.rdp-day_disabled {
+  color: #d1d5db;
+  opacity: 0.5;
+}
+
+.rdp-day_hidden {
+  visibility: hidden;
+}
+
