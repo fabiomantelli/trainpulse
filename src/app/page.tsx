@@ -77,16 +77,16 @@ export default async function Home({
         </h1>
         
         <p className="text-2xl sm:text-3xl font-bold mb-4 text-gray-800 dark:text-gray-100 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          Personal Trainer Software for Your Fitness Business
+          Your Fitness Business, Simplified
         </p>
         
         <p className="text-lg sm:text-xl mb-4 text-gray-600 dark:text-gray-300 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          The all-in-one fitness business management platform that personal trainers love
+          The all-in-one platform that personal trainers love
         </p>
         
         <p className="text-base sm:text-lg mb-12 text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-          Manage clients, schedules, workouts, and payments in one powerful personal trainer software. 
-          Built by trainers, for trainers. Scale your fitness business effortlessly in the USA.
+          Manage clients, schedules, workouts, and payments in one powerful platform. 
+          Built by trainers, for trainers. Scale your business effortlessly.
         </p>
         
         <div className="flex flex-col gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
