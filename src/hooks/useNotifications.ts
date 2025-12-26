@@ -198,7 +198,7 @@ export function useNotifications(trainerId: string | null) {
 
       // Add stored notifications
       if (storedNotifications) {
-        storedNotifications.forEach((notif) => {
+        (storedNotifications as Notification[]).forEach((notif) => {
           if (!seenIds.has(notif.id)) {
             allNotifications.push({
               id: notif.id,
@@ -251,8 +251,7 @@ export function useNotifications(trainerId: string | null) {
       }
 
       // For stored notifications, update in database
-      const { error } = await supabase
-        .from('notifications')
+      const { error } = await (supabase.from('notifications') as any)
         .update({ read_at: new Date().toISOString() })
         .eq('id', notificationId)
         .eq('trainer_id', trainerId!)
@@ -276,8 +275,7 @@ export function useNotifications(trainerId: string | null) {
     const unreadStored = notifications.filter((n) => !n.isRead && !n.id.startsWith('appt-') && !n.id.startsWith('invoice-'))
     
     if (unreadStored.length > 0) {
-      const { error } = await supabase
-        .from('notifications')
+      const { error } = await (supabase.from('notifications') as any)
         .update({ read_at: new Date().toISOString() })
         .eq('trainer_id', trainerId)
         .is('read_at', null)
