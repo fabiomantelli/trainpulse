@@ -83,8 +83,8 @@ export default function AppointmentForm({
     )
 
     // Check for conflicts
-    let query = supabase
-      .from('appointments')
+    let query = (supabase
+      .from('appointments') as any)
       .select('id, scheduled_at, duration_minutes')
       .eq('trainer_id', trainerId)
       .neq('status', 'cancelled')
@@ -96,7 +96,7 @@ export default function AppointmentForm({
     const { data: existing } = await query
 
     if (existing) {
-      const hasConflict = existing.some((apt) => {
+      const hasConflict = (existing as Array<{ id: string; scheduled_at: string; duration_minutes: number }>).some((apt) => {
         const aptStart = new Date(apt.scheduled_at)
         const aptEnd = new Date(
           aptStart.getTime() + apt.duration_minutes * 60000
@@ -163,8 +163,8 @@ export default function AppointmentForm({
     try {
       if (appointment) {
         // Editing - no recurring support for edits
-        const { error } = await supabase
-          .from('appointments')
+        const { error } = await (supabase
+          .from('appointments') as any)
           .update(appointmentData)
           .eq('id', appointment.id)
 
@@ -207,8 +207,8 @@ export default function AppointmentForm({
             }
           }
 
-          const { error, data } = await supabase
-            .from('appointments')
+          const { error, data } = await (supabase
+            .from('appointments') as any)
             .insert(appointmentsToCreate)
             .select()
 
@@ -216,8 +216,8 @@ export default function AppointmentForm({
           toast.success(`Created ${appointmentsToCreate.length} recurring appointments successfully!`)
         } else {
           // Single appointment
-          const { error, data } = await supabase
-            .from('appointments')
+          const { error, data } = await (supabase
+            .from('appointments') as any)
             .insert(appointmentData)
             .select()
 
