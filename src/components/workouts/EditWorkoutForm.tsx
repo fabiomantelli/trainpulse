@@ -26,7 +26,7 @@ export default function EditWorkoutForm({ workout, trainerId }: { workout: Worko
   const [description, setDescription] = useState(workout.description || '')
   const [isTemplate, setIsTemplate] = useState(workout.is_template || false)
   const [exercises, setExercises] = useState<Exercise[]>(
-    Array.isArray(workout.exercises) ? workout.exercises : []
+    Array.isArray(workout.exercises) ? (workout.exercises as Exercise[]) : []
   )
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
