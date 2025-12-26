@@ -10,14 +10,9 @@ type Client = Database['public']['Tables']['clients']['Row']
 
 export default function ClientsContent({ trainerId }: { trainerId: string }) {
   const [searchQuery, setSearchQuery] = useState('')
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:10',message:'ClientsContent mount',data:{trainerId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  }, [trainerId]);
-  // #endregion
-
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
+  const supabaseClient = createClient()
 
   // Filter clients based on search query
   const filteredClients = useMemo(() => {
@@ -32,41 +27,18 @@ export default function ClientsContent({ trainerId }: { trainerId: string }) {
         client.goals?.toLowerCase().includes(query)
     )
   }, [clients, searchQuery])
-  
-  // #region agent log
-  let supabase;
-  try {
-    supabase = createClient();
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:18',message:'createClient called',data:{hasSupabase:!!supabase},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  } catch (error) {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:20',message:'createClient error',data:{errorMessage:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    throw error;
-  }
-  const supabaseClient = supabase;
-  // #endregion
 
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:28',message:'useEffect triggered',data:{trainerId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     loadClients()
   }, [trainerId])
 
   async function loadClients() {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:35',message:'loadClients start',data:{trainerId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-
     try {
       const { data, error } = await supabaseClient
         .from('clients')
         .select('*')
         .eq('trainer_id', trainerId)
         .order('created_at', { ascending: false })
-
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:44',message:'loadClients result',data:{hasError:!!error,errorMessage:error?.message,clientsCount:data?.length || 0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
 
       if (error) {
         console.error('Error loading clients:', error)
@@ -75,19 +47,10 @@ export default function ClientsContent({ trainerId }: { trainerId: string }) {
       }
       setLoading(false)
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:53',message:'loadClients exception',data:{errorMessage:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       console.error('Unexpected error loading clients:', error)
       setLoading(false)
     }
   }
-
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ClientsContent.tsx:60',message:'ClientsContent render',data:{loading,clientsCount:clients.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  }, [loading, clients.length]);
-  // #endregion
 
   if (loading) {
     return (

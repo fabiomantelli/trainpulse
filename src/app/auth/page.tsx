@@ -1,21 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 
-export default function SignUpPage() {
+function AuthContent() {
+  const [step, setStep] = useState<'email' | 'signin' | 'signup' | 'verify-email'>('email')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(false)
+  const [checkingEmail, setCheckingEmail] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [showVerification, setShowVerification] = useState(false)
   const [resendingEmail, setResendingEmail] = useState(false)
   const [emailSent, setEmailSent] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
@@ -28,7 +30,96 @@ export default function SignUpPage() {
       }
     }
     checkUser()
-  }, [supabase, router])
+
+    // Always start with email step for unified flow
+    // The step will change after email is submitted and verified
+
+    // Check for error in URL params
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam))
+    }
+  }, [searchParams, supabase, router])
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!email || !isValidEmail(email)) {
+      setError('Please enter a valid email address')
+      return
+    }
+
+    setCheckingEmail(true)
+    setError(null)
+
+    try {
+      // Try to sign in with a dummy password to check if user exists
+      // This is a standard pattern used by modern apps (Linear, Vercel, etc.)
+      // Supabase will return "Invalid login credentials" if user exists (wrong password)
+      // For security, Supabase doesn't reveal if email exists or not in most cases
+      // So we'll try sign in and check the error type
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'dummy-password-check-' + Date.now(),
+      })
+
+      if (signInError) {
+        const errorMessage = signInError.message.toLowerCase()
+        
+        // User exists but wrong password (this is what we expect)
+        if (errorMessage.includes('invalid login') || 
+            errorMessage.includes('invalid credentials') ||
+            errorMessage.includes('email not confirmed') ||
+            errorMessage.includes('wrong password')) {
+          setStep('signin')
+        } else {
+          // User might not exist or different error - default to signup
+          // This is the safer option - let user create account
+          setStep('signup')
+        }
+      } else {
+        // This shouldn't happen with dummy password, but if it does, go to signin
+        setStep('signin')
+      }
+    } catch (err) {
+      // On any error, default to signup (new user flow)
+      // This is safer - let user create account if unsure
+      setStep('signup')
+    } finally {
+      setCheckingEmail(false)
+    }
+  }
+
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        setError(error.message)
+        setLoading(false)
+      } else {
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session) {
+          router.refresh()
+          router.push('/dashboard')
+        } else {
+          setError('Session could not be established. Please try again.')
+          setLoading(false)
+        }
+      }
+    } catch (err) {
+      console.error('Sign in error:', err)
+      setError('An unexpected error occurred. Please try again.')
+      setLoading(false)
+    }
+  }
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,7 +127,7 @@ export default function SignUpPage() {
     setError(null)
 
     // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:29',message:'handleSignUp called',data:{email,hasFullName:!!fullName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:122',message:'handleSignUp called',data:{email,hasFullName:!!fullName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
 
     try {
@@ -51,7 +142,7 @@ export default function SignUpPage() {
       })
 
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:43',message:'signUp response',data:{hasError:!!error,errorMessage:error?.message,hasData:!!data,hasUser:!!data?.user,hasSession:!!data?.session,userId:data?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:136',message:'signUp response',data:{hasError:!!error,errorMessage:error?.message,hasData:!!data,hasUser:!!data?.user,hasSession:!!data?.session,userId:data?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
 
       // Log detailed signup response for debugging email sending
@@ -66,7 +157,7 @@ export default function SignUpPage() {
 
       if (error) {
         // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:46',message:'signUp error',data:{errorMessage:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:139',message:'signUp error',data:{errorMessage:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         setError(error.message)
         setLoading(false)
@@ -76,7 +167,7 @@ export default function SignUpPage() {
       // Check if session is in the signUp response
       if (data?.session) {
         // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:53',message:'Session found in signUp response',data:{hasSession:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:148',message:'Session found in signUp response',data:{hasSession:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
         // #endregion
         await new Promise(resolve => setTimeout(resolve, 300))
         router.refresh()
@@ -87,7 +178,7 @@ export default function SignUpPage() {
       // If no session but user was created, email verification is required
       if (data?.user && !data?.session) {
         // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:58',message:'Email verification required',data:{hasUser:true,hasSession:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:158',message:'Email verification required',data:{hasUser:true,hasSession:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
         // #endregion
         
         // Log email verification status
@@ -102,14 +193,14 @@ export default function SignUpPage() {
         // Note: Supabase automatically sends verification email when user is created
         // and email_confirmations is enabled in the dashboard
         setEmailSent(!emailConfirmed) // Assume email was sent if not confirmed
-        setShowVerification(true)
+        setStep('verify-email')
         setLoading(false)
         return
       }
 
       // If no session in signUp response, try to sign in (fallback for cases where email confirmation is disabled)
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:64',message:'No session in signUp, calling signInWithPassword',data:{hasUser:!!data?.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:164',message:'No session in signUp, calling signInWithPassword',data:{hasUser:!!data?.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
       // #endregion
 
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -118,7 +209,7 @@ export default function SignUpPage() {
       })
 
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:70',message:'signInWithPassword response',data:{hasError:!!signInError,errorMessage:signInError?.message,hasSession:!!signInData?.session,hasUser:!!signInData?.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:170',message:'signInWithPassword response',data:{hasError:!!signInError,errorMessage:signInError?.message,hasSession:!!signInData?.session,hasUser:!!signInData?.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
       // #endregion
 
       if (signInError) {
@@ -126,12 +217,12 @@ export default function SignUpPage() {
         if (signInError.message.toLowerCase().includes('email not confirmed') || 
             signInError.message.toLowerCase().includes('confirm your email')) {
           setEmailSent(true)
-          setShowVerification(true)
+          setStep('verify-email')
           setLoading(false)
           return
         }
         // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:80',message:'signInWithPassword error',data:{errorMessage:signInError.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:180',message:'signInWithPassword error',data:{errorMessage:signInError.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         setError(signInError.message || 'Account created but could not sign in. Please try signing in manually.')
         setLoading(false)
@@ -140,7 +231,7 @@ export default function SignUpPage() {
 
       if (signInData?.session) {
         // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:88',message:'Session established via signIn, redirecting',data:{hasSession:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:190',message:'Session established via signIn, redirecting',data:{hasSession:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         // Wait a moment for the profile trigger to complete
         await new Promise(resolve => setTimeout(resolve, 300))
@@ -148,18 +239,42 @@ export default function SignUpPage() {
         router.push('/dashboard')
       } else {
         // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:94',message:'No session after signInWithPassword',data:{hasSignInData:!!signInData},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:196',message:'No session after signInWithPassword',data:{hasSignInData:!!signInData},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
         // #endregion
         setError('Account created but session could not be established. Please try signing in.')
         setLoading(false)
       }
     } catch (err) {
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:85',message:'handleSignUp exception',data:{errorMessage:err instanceof Error ? err.message : String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:179',message:'handleSignUp exception',data:{errorMessage:err instanceof Error ? err.message : String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
       // #endregion
       console.error('Sign up error:', err)
       setError('An unexpected error occurred. Please try again.')
       setLoading(false)
+    }
+  }
+
+  const isValidEmail = (email: string) => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  }
+
+  const handleBackToEmail = () => {
+    setStep('email')
+    setError(null)
+    setPassword('')
+    setFullName('')
+  }
+
+  const handleSwitchMode = () => {
+    if (step === 'signin') {
+      setStep('signup')
+    } else if (step === 'signup') {
+      setStep('signin')
+    }
+    setError(null)
+    setPassword('')
+    if (step === 'signup') {
+      setFullName('')
     }
   }
 
@@ -208,10 +323,22 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
+        {/* Logo */}
+        <div className="flex justify-center">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 via-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-xl">TP</span>
+            </div>
+            <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              TrainPulse
+            </span>
+          </Link>
+        </div>
+
         <AnimatePresence mode="wait">
-          {!showVerification ? (
+          {step === 'email' && (
             <motion.div
-              key="signup-form"
+              key="email"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
@@ -219,16 +346,180 @@ export default function SignUpPage() {
             >
               <div>
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-                  Create your TrainPulse account
+                  Get Started
                 </h2>
                 <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                  Already have an account?{' '}
-                  <Link
-                    href="/auth"
-                    className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+                  Enter your email to continue
+                </p>
+              </div>
+              <form className="mt-8 space-y-6" onSubmit={handleEmailSubmit}>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800"
                   >
-                    Sign in
-                  </Link>
+                    <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                  </motion.div>
+                )}
+                <div>
+                  <label htmlFor="email" className="sr-only">
+                    Email address
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    autoFocus
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all hover:border-gray-400 dark:hover:border-slate-500"
+                    placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={checkingEmail}
+                  />
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={checkingEmail || !email}
+                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                  >
+                    {checkingEmail ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Checking...
+                      </span>
+                    ) : (
+                      'Continue'
+                    )}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+
+          {step === 'signin' && (
+            <motion.div
+              key="signin"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div>
+                <button
+                  onClick={handleBackToEmail}
+                  className="mb-4 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back
+                </button>
+                <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                  Welcome back
+                </h2>
+                <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                  Sign in to your account
+                </p>
+                <p className="mt-1 text-center text-xs text-gray-500 dark:text-gray-500">
+                  {email}
+                </p>
+              </div>
+              <form className="mt-8 space-y-6" onSubmit={handleSignIn}>
+                {error && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800"
+                  >
+                    <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
+                  </motion.div>
+                )}
+                <div>
+                  <label htmlFor="password" className="sr-only">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    name="password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    autoFocus
+                    className="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all hover:border-gray-400 dark:hover:border-slate-500"
+                    placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                  />
+                </div>
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl"
+                  >
+                    {loading ? (
+                      <span className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Signing in...
+                      </span>
+                    ) : (
+                      'Sign in'
+                    )}
+                  </button>
+                </div>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleSwitchMode}
+                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Don't have an account? Create one
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+
+          {step === 'signup' && (
+            <motion.div
+              key="signup"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div>
+                <button
+                  onClick={handleBackToEmail}
+                  className="mb-4 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 flex items-center gap-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back
+                </button>
+                <h2 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+                  Create your account
+                </h2>
+                <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+                  Get started with TrainPulse
+                </p>
+                <p className="mt-1 text-center text-xs text-gray-500 dark:text-gray-500">
+                  {email}
                 </p>
               </div>
               <form className="mt-8 space-y-6" onSubmit={handleSignUp}>
@@ -241,7 +532,7 @@ export default function SignUpPage() {
                     <p className="text-sm text-red-800 dark:text-red-200">{error}</p>
                   </motion.div>
                 )}
-                <div className="rounded-md shadow-sm space-y-4">
+                <div className="space-y-4">
                   <div>
                     <label htmlFor="fullName" className="sr-only">
                       Full Name
@@ -251,6 +542,7 @@ export default function SignUpPage() {
                       name="fullName"
                       type="text"
                       required
+                      autoFocus
                       className="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all hover:border-gray-400 dark:hover:border-slate-500"
                       placeholder="Full Name"
                       value={fullName}
@@ -259,28 +551,11 @@ export default function SignUpPage() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="sr-only">
-                      Email address
-                    </label>
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      autoComplete="email"
-                      required
-                      className="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all hover:border-gray-400 dark:hover:border-slate-500"
-                      placeholder="Email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      disabled={loading}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="password" className="sr-only">
+                    <label htmlFor="password-signup" className="sr-only">
                       Password
                     </label>
                     <input
-                      id="password"
+                      id="password-signup"
                       name="password"
                       type="password"
                       autoComplete="new-password"
@@ -355,9 +630,21 @@ export default function SignUpPage() {
                     )}
                   </button>
                 </div>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={handleSwitchMode}
+                    className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Already have an account? Sign in
+                  </button>
+                </div>
               </form>
             </motion.div>
-          ) : (
+          )}
+
+          {step === 'verify-email' && (
             <motion.div
               key="verify-email"
               initial={{ opacity: 0, y: 20 }}
@@ -501,18 +788,37 @@ export default function SignUpPage() {
                   )}
                 </button>
 
-                <Link
-                  href="/auth"
-                  className="block w-full py-3 px-4 text-sm font-medium text-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
+                <button
+                  onClick={() => {
+                    setStep('email')
+                    setEmail('')
+                    setPassword('')
+                    setFullName('')
+                    setError(null)
+                    setEmailSent(false)
+                  }}
+                  className="w-full py-3 px-4 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
                 >
                   Back to login
-                </Link>
+                </button>
               </div>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950">
+        <div className="text-lg">Loading...</div>
+      </div>
+    }>
+      <AuthContent />
+    </Suspense>
   )
 }
 

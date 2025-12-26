@@ -57,12 +57,6 @@ export default function AppointmentForm({
     client.name.toLowerCase().includes(clientSearch.toLowerCase())
   )
 
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:75',message:'Clients filter check',data:{clientsCount:clients.length,filteredCount:filteredClients.length,clientSearch},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  }, [clients.length, filteredClients.length, clientSearch]);
-  // #endregion
-
   useEffect(() => {
     if (selectedDate && selectedTime && selectedClientId) {
       checkConflicts()
@@ -122,23 +116,13 @@ export default function AppointmentForm({
     e.preventDefault()
     setLoading(true)
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:111',message:'handleSubmit called',data:{hasClientId:!!selectedClientId,hasConflictError:!!conflictError,selectedDate:selectedDate?.toISOString(),selectedTime,selectedDuration},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-
     if (!selectedClientId) {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:115',message:'Validation failed - no client',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       toast.error('Please select a client')
       setLoading(false)
       return
     }
 
     if (conflictError) {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:121',message:'Validation failed - conflict',data:{conflictError},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       toast.error(conflictError)
       setLoading(false)
       return
@@ -157,10 +141,6 @@ export default function AppointmentForm({
       notes: notes || null,
     }
 
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:131',message:'Before Supabase insert',data:{appointmentData},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-
     try {
       if (appointment) {
         // Editing - no recurring support for edits
@@ -168,10 +148,6 @@ export default function AppointmentForm({
           .from('appointments') as any)
           .update(appointmentData)
           .eq('id', appointment.id)
-
-        // #region agent log
-        fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:142',message:'After Supabase update',data:{hasError:!!error,errorMessage:error?.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
 
         if (error) throw error
         toast.success('Appointment updated successfully!')
@@ -222,28 +198,13 @@ export default function AppointmentForm({
             .insert(appointmentData)
             .select()
 
-          // #region agent log
-          fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:150',message:'After Supabase insert',data:{hasError:!!error,errorMessage:error?.message,hasData:!!data,insertedId:data?.[0]?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-          // #endregion
-
           if (error) throw error
           toast.success('Appointment created successfully!')
         }
       }
 
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:158',message:'Before onSuccess callback',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-
       onSuccess()
-
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:163',message:'After onSuccess callback',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
     } catch (error: any) {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:159',message:'Error in handleSubmit',data:{errorMessage:error?.message,errorString:String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       toast.error(error.message || 'Failed to save appointment')
     } finally {
       setLoading(false)
@@ -251,12 +212,6 @@ export default function AppointmentForm({
   }
 
   const selectedClient = clients.find((c) => c.id === selectedClientId)
-
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:200',message:'AppointmentForm render',data:{clientsCount:clients.length,hasSelectedClientId:!!selectedClientId,selectedClientId,hasConflictError:!!conflictError,loading},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-  }, [clients.length, selectedClientId, conflictError, loading]);
-  // #endregion
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -299,9 +254,6 @@ export default function AppointmentForm({
                       key={client.id}
                       type="button"
                       onClick={() => {
-                        // #region agent log
-                        fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:235',message:'Client selected',data:{clientId:client.id,clientName:client.name},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-                        // #endregion
                         setSelectedClientId(client.id)
                         setClientSearch(client.name)
                       }}

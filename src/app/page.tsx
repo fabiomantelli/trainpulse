@@ -47,19 +47,22 @@ export default async function Home() {
           Built by trainers, for trainers. Scale your business effortlessly.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <Link
-            href="/auth/signin"
-            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all font-semibold shadow-xl hover:shadow-2xl hover:scale-105 text-lg"
-          >
-            Start Free Trial
-          </Link>
+        <div className="flex flex-col gap-4 justify-center items-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
           <Link
             href="/auth/signup"
-            className="px-8 py-4 bg-white dark:bg-slate-800 text-gray-900 dark:text-gray-100 rounded-xl hover:bg-gray-50 dark:hover:bg-slate-700 transition-all font-semibold shadow-lg hover:shadow-xl border border-gray-200 dark:border-slate-700 text-lg"
+            className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all font-semibold shadow-xl hover:shadow-2xl hover:scale-105 text-lg"
           >
-            Create Account
+            Get Started
           </Link>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Already have an account?{' '}
+            <Link
+              href="/auth"
+              className="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline"
+            >
+              Sign in
+            </Link>
+          </p>
         </div>
         
         {/* Feature highlights */}

@@ -18,16 +18,7 @@ export default function NewAppointmentPage({
 }) {
   const router = useRouter()
 
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'NewAppointmentPage.tsx:17',message:'NewAppointmentPage render',data:{clientsCount:clients.length,trainerId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-  }, [clients.length, trainerId]);
-  // #endregion
-
   const handleSuccess = () => {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'NewAppointmentPage.tsx:25',message:'handleSuccess called',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     router.push('/appointments')
     router.refresh()
   }

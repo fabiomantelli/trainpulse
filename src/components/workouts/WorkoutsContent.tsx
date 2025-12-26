@@ -9,51 +9,23 @@ import AssignWorkoutModal from './AssignWorkoutModal'
 type Workout = Database['public']['Tables']['workouts']['Row']
 
 export default function WorkoutsContent({ trainerId }: { trainerId: string }) {
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:10',message:'WorkoutsContent mount',data:{trainerId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  }, [trainerId]);
-  // #endregion
-
   const [workouts, setWorkouts] = useState<Workout[]>([])
   const [loading, setLoading] = useState(true)
   const [assignModalOpen, setAssignModalOpen] = useState(false)
   const [selectedWorkoutId, setSelectedWorkoutId] = useState<string | null>(null)
-  
-  // #region agent log
-  let supabase;
-  try {
-    supabase = createClient();
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:18',message:'createClient called',data:{hasSupabase:!!supabase},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  } catch (error) {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:20',message:'createClient error',data:{errorMessage:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    throw error;
-  }
-  const supabaseClient = supabase;
-  // #endregion
+  const supabaseClient = createClient()
 
   useEffect(() => {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:28',message:'useEffect triggered',data:{trainerId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
     loadWorkouts()
   }, [trainerId])
 
   async function loadWorkouts() {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:35',message:'loadWorkouts start',data:{trainerId},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-
     try {
       const { data, error } = await supabaseClient
         .from('workouts')
         .select('*')
         .eq('trainer_id', trainerId)
         .order('created_at', { ascending: false })
-
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:44',message:'loadWorkouts result',data:{hasError:!!error,errorMessage:error?.message,workoutsCount:data?.length || 0},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
 
       if (error) {
         console.error('Error loading workouts:', error)
@@ -62,19 +34,10 @@ export default function WorkoutsContent({ trainerId }: { trainerId: string }) {
       }
       setLoading(false)
     } catch (error) {
-      // #region agent log
-      fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:53',message:'loadWorkouts exception',data:{errorMessage:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       console.error('Unexpected error loading workouts:', error)
       setLoading(false)
     }
   }
-
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'WorkoutsContent.tsx:60',message:'WorkoutsContent render',data:{loading,workoutsCount:workouts.length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-  }, [loading, workouts.length]);
-  // #endregion
 
   if (loading) {
     return (

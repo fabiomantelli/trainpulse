@@ -4,22 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { motion } from 'framer-motion'
 
 export default function ThemeToggle() {
-  // #region agent log
-  fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ThemeToggle.tsx:6',message:'ThemeToggle render start',data:{hasWindow:typeof window !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-  // #endregion
-  let themeContext;
-  try {
-    themeContext = useTheme();
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ThemeToggle.tsx:12',message:'ThemeToggle useTheme success',data:{hasContext:!!themeContext,theme:themeContext?.theme},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-  } catch (error) {
-    // #region agent log
-    fetch('http://127.0.0.1:7244/ingest/2558d52a-fba9-4902-9fcf-1ea396cdccc6',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ThemeToggle.tsx:16',message:'ThemeToggle useTheme error',data:{errorMessage:error instanceof Error ? error.message : String(error)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-    // #endregion
-    throw error;
-  }
-  const { theme, toggleTheme } = themeContext;
+  const { theme, toggleTheme } = useTheme()
 
   return (
     <button

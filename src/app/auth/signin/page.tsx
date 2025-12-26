@@ -71,17 +71,24 @@ function SignInContent() {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Sign in to TrainPulse
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Don't have an account?{' '}
-            <Link
-              href="/auth/signup"
-              className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
-            >
-              create a new account
-            </Link>
-          </p>
+              Sign in to TrainPulse
+            </h2>
+            <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+              New to TrainPulse?{' '}
+              <Link
+                href="/auth"
+                className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                Get started
+              </Link>
+              {' '}or{' '}
+              <Link
+                href="/auth/signup"
+                className="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
+              >
+                create an account
+              </Link>
+            </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSignIn}>
           {error && (
