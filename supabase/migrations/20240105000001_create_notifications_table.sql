@@ -45,3 +45,4 @@ CREATE POLICY "Trainers can delete their own notifications"
   USING (auth.uid() = trainer_id);
 
 
+

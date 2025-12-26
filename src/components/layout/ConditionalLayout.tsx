@@ -3,6 +3,7 @@
 import { ReactNode, useEffect, useState, useLayoutEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import AppLayout from './AppLayout'
+import PWAProvider from '@/components/pwa/PWAProvider'
 
 export default function ConditionalLayout({ 
   children,
@@ -52,9 +53,13 @@ export default function ConditionalLayout({
   }, [pathname, mounted])
 
   if (shouldSkipLayout) {
-    return <>{children}</>
+    return <PWAProvider>{children}</PWAProvider>
   }
 
-  return <AppLayout>{children}</AppLayout>
+  return (
+    <PWAProvider>
+      <AppLayout>{children}</AppLayout>
+    </PWAProvider>
+  )
 }
 

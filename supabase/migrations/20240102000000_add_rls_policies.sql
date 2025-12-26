@@ -115,3 +115,4 @@ CREATE POLICY "Trainers can insert their own payments"
   WITH CHECK (auth.uid() = trainer_id);
 
 
+
