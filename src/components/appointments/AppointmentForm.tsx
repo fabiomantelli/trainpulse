@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { format, addDays, addWeeks, addMonths } from 'date-fns'
+import { format, addDays, addWeeks, addMonths, parse, isToday, startOfDay } from 'date-fns'
 import { motion } from 'framer-motion'
 import TimeSlotPicker from './TimeSlotPicker'
 import { Database } from '@/types/database.types'
@@ -17,6 +17,7 @@ interface AppointmentFormProps {
   clients: Client[]
   onSuccess: () => void
   onCancel: () => void
+  initialDate?: Date | null
 }
 
 export default function AppointmentForm({
@@ -25,15 +26,74 @@ export default function AppointmentForm({
   clients,
   onSuccess,
   onCancel,
+  initialDate,
 }: AppointmentFormProps) {
   const [selectedDate, setSelectedDate] = useState<Date>(
-    appointment ? new Date(appointment.scheduled_at) : new Date()
+    appointment ? new Date(appointment.scheduled_at) : (initialDate || new Date())
   )
+  // #region agent log
+  useEffect(() => {
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:29',message:'selectedDate state changed',data:{selectedDateISO:selectedDate.toISOString(),selectedDateFormatted:format(selectedDate,'yyyy-MM-dd'),selectedDateLocal:selectedDate.toString(),timezoneOffset:selectedDate.getTimezoneOffset(),hours:selectedDate.getHours(),minutes:selectedDate.getMinutes(),hasInitialDate:!!initialDate,initialDateISO:initialDate?.toISOString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
+  }, [selectedDate, initialDate]);
+  // #endregion
+  // Update selectedDate and selectedTime when initialDate changes (when modal opens with new date)
+  useEffect(() => {
+    if (initialDate && !appointment) {
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:40',message:'initialDate prop changed - updating selectedDate and selectedTime',data:{initialDateISO:initialDate.toISOString(),initialDateHours:initialDate.getHours(),initialDateMinutes:initialDate.getMinutes(),currentSelectedDateISO:selectedDate.toISOString(),currentSelectedTime:selectedTime},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      setSelectedDate(initialDate)
+      // Extract time from initialDate and set selectedTime
+      const hours = initialDate.getHours().toString().padStart(2, '0')
+      const minutes = initialDate.getMinutes().toString().padStart(2, '0')
+      const timeString = `${hours}:${minutes}`
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:47',message:'Setting selectedTime from initialDate',data:{timeString,initialDateISO:initialDate.toISOString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'E'})}).catch(()=>{});
+      // #endregion
+      setSelectedTime(timeString)
+    }
+  }, [initialDate, appointment])
   const [selectedTime, setSelectedTime] = useState<string>(
     appointment
       ? format(new Date(appointment.scheduled_at), 'HH:mm')
       : '09:00'
   )
+  const timeAdjustmentRef = useRef<string | null>(null)
+
+  // Adjust selectedTime if it's in the past when date is today
+  useEffect(() => {
+    if (!appointment && isToday(selectedDate)) {
+      const now = new Date()
+      const [hours, minutes] = selectedTime.split(':').map(Number)
+      const selectedDateTime = new Date(selectedDate)
+      selectedDateTime.setHours(hours, minutes, 0, 0)
+      
+      if (selectedDateTime < now) {
+        // Find next available time slot (round up to next 30 minutes)
+        const nextHour = now.getHours()
+        const nextMinute = now.getMinutes() < 30 ? 30 : 0
+        const nextHourAdjusted = nextMinute === 0 ? nextHour + 1 : nextHour
+        // Ensure we don't go past 23:30
+        if (nextHourAdjusted < 24) {
+          const newTime = `${nextHourAdjusted.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`
+          // Only adjust if we haven't already adjusted to this time
+          if (timeAdjustmentRef.current !== newTime) {
+            // #region agent log
+            fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:56',message:'Adjusting selectedTime - was in past',data:{oldTime:selectedTime,newTime,selectedDateISO:selectedDate.toISOString(),nowISO:now.toISOString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'D'})}).catch(()=>{});
+            // #endregion
+            timeAdjustmentRef.current = newTime
+            setSelectedTime(newTime)
+          }
+        }
+      } else {
+        // Reset ref when time is valid
+        timeAdjustmentRef.current = null
+      }
+    } else {
+      // Reset ref when date is not today
+      timeAdjustmentRef.current = null
+    }
+  }, [selectedDate, appointment, selectedTime])
   const [selectedDuration, setSelectedDuration] = useState<number>(
     appointment?.duration_minutes || 60
   )
@@ -309,8 +369,20 @@ export default function AppointmentForm({
           type="date"
           value={format(selectedDate, 'yyyy-MM-dd')}
           onChange={(e) => {
-            const newDate = new Date(e.target.value)
+            // #region agent log
+            fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:316',message:'Date onChange - input value received',data:{inputValue:e.target.value,currentSelectedDate:selectedDate.toISOString(),currentFormatted:format(selectedDate,'yyyy-MM-dd'),timezoneOffset:selectedDate.getTimezoneOffset()},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
+            // Fix: Parse date string as local date to avoid timezone issues
+            // e.target.value is in format 'yyyy-MM-dd', parse it as local date
+            const [year, month, day] = e.target.value.split('-').map(Number)
+            const newDate = new Date(year, month - 1, day)
+            // #region agent log
+            fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:321',message:'Date onChange - Date object created (FIXED)',data:{newDateISO:newDate.toISOString(),newDateLocal:newDate.toString(),newDateFormatted:format(newDate,'yyyy-MM-dd'),timezoneOffset:newDate.getTimezoneOffset(),isValid:!isNaN(newDate.getTime()),hours:newDate.getHours(),minutes:newDate.getMinutes(),year,month,day},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
+            // #endregion
             if (!isNaN(newDate.getTime())) {
+              // #region agent log
+              fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:323',message:'Date onChange - setting state',data:{oldDateISO:selectedDate.toISOString(),newDateISO:newDate.toISOString(),datesEqual:selectedDate.getTime()===newDate.getTime()},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
+              // #endregion
               setSelectedDate(newDate)
             }
           }}
@@ -325,6 +397,7 @@ export default function AppointmentForm({
         selectedDuration={selectedDuration}
         onTimeChange={setSelectedTime}
         onDurationChange={setSelectedDuration}
+        selectedDate={selectedDate}
       />
 
       {/* Status (only for editing) */}

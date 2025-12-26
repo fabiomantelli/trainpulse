@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { isToday, startOfDay } from 'date-fns'
 
 const timeSlots = Array.from({ length: 48 }, (_, i) => {
   const hour = Math.floor(i / 2)
@@ -16,11 +17,13 @@ export default function TimeSlotPicker({
   selectedDuration,
   onTimeChange,
   onDurationChange,
+  selectedDate,
 }: {
   selectedTime: string
   selectedDuration: number
   onTimeChange: (time: string) => void
   onDurationChange: (duration: number) => void
+  selectedDate?: Date
 }) {
   const [showTimePicker, setShowTimePicker] = useState(false)
   const [showDurationPicker, setShowDurationPicker] = useState(false)
@@ -31,6 +34,17 @@ export default function TimeSlotPicker({
     const ampm = hour >= 12 ? 'PM' : 'AM'
     const displayHour = hour % 12 || 12
     return `${displayHour}:${minutes} ${ampm}`
+  }
+
+  const isTimeSlotDisabled = (time: string) => {
+    if (!selectedDate || !isToday(selectedDate)) {
+      return false
+    }
+    const now = new Date()
+    const [hours, minutes] = time.split(':').map(Number)
+    const timeSlot = new Date(selectedDate)
+    timeSlot.setHours(hours, minutes, 0, 0)
+    return timeSlot < now
   }
 
   return (
@@ -60,23 +74,31 @@ export default function TimeSlotPicker({
               className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto"
             >
               <div className="p-2">
-                {timeSlots.map((time) => (
-                  <button
-                    key={time}
-                    type="button"
-                    onClick={() => {
-                      onTimeChange(time)
-                      setShowTimePicker(false)
-                    }}
-                    className={`w-full px-3 py-2 text-left text-sm rounded-md hover:bg-blue-50 transition-colors ${
-                      selectedTime === time
-                        ? 'bg-blue-100 text-blue-700 font-medium'
-                        : 'text-gray-700'
-                    }`}
-                  >
-                    {formatTime(time)}
-                  </button>
-                ))}
+                {timeSlots.map((time) => {
+                  const isDisabled = isTimeSlotDisabled(time)
+                  return (
+                    <button
+                      key={time}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => {
+                        if (!isDisabled) {
+                          onTimeChange(time)
+                          setShowTimePicker(false)
+                        }
+                      }}
+                      className={`w-full px-3 py-2 text-left text-sm rounded-md transition-colors ${
+                        isDisabled
+                          ? 'text-gray-400 cursor-not-allowed opacity-50'
+                          : selectedTime === time
+                          ? 'bg-blue-100 text-blue-700 font-medium hover:bg-blue-50'
+                          : 'text-gray-700 hover:bg-blue-50'
+                      }`}
+                    >
+                      {formatTime(time)}
+                    </button>
+                  )
+                })}
               </div>
             </motion.div>
           </>

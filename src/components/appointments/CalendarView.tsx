@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, addDays, startOfDay, addHours } from 'date-fns'
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isToday, addMonths, subMonths, startOfWeek, endOfWeek, addDays, startOfDay, addHours, isBefore } from 'date-fns'
 import { motion } from 'framer-motion'
 import { Database } from '@/types/database.types'
 import AppointmentCard from './AppointmentCard'
@@ -54,6 +54,17 @@ export default function CalendarView({
   const getAppointmentsForDate = (date: Date) => {
     const dateKey = format(date, 'yyyy-MM-dd')
     return appointmentsByDate.get(dateKey) || []
+  }
+
+  const isPastDate = (date: Date) => {
+    const today = startOfDay(new Date())
+    const dateToCheck = startOfDay(date)
+    return isBefore(dateToCheck, today)
+  }
+
+  const isPastDateTime = (date: Date) => {
+    const now = new Date()
+    return date < now
   }
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -167,6 +178,7 @@ export default function CalendarView({
               {monthDays.map((day) => {
                 const dayAppointments = getAppointmentsForDate(day)
                 const isCurrentDay = isToday(day)
+                const isPast = isPastDate(day)
                 
                 if (dayAppointments.length === 0 && !isCurrentDay) return null
 
@@ -176,17 +188,21 @@ export default function CalendarView({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`p-4 border-2 rounded-xl transition-all ${
-                      isCurrentDay
-                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md'
-                        : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm'
+                      isPast
+                        ? 'border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-900/50 opacity-60 cursor-not-allowed'
+                        : isCurrentDay
+                        ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/30 shadow-md cursor-pointer'
+                        : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm cursor-pointer'
                     }`}
-                    onClick={() => onDateClick(day)}
+                    onClick={() => !isPast && onDateClick(day)}
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
                         <div
                           className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
-                            isCurrentDay
+                            isPast
+                              ? 'bg-gray-100 dark:bg-slate-800 text-gray-400 dark:text-slate-600 opacity-60'
+                              : isCurrentDay
                               ? 'bg-blue-500 text-white'
                               : 'bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200'
                           }`}
@@ -273,20 +289,29 @@ export default function CalendarView({
                 const dayAppointments = getAppointmentsForDate(day)
                 const isCurrentMonth = isSameDay(day, monthStart) || day > monthStart
                 const isCurrentDay = isToday(day)
+                const isPast = isPastDate(day)
 
                 return (
                   <motion.div
                     key={day.toISOString()}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className={`min-h-[100px] p-2 border border-gray-200 dark:border-slate-700 rounded-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors ${
+                    className={`min-h-[100px] p-2 border border-gray-200 dark:border-slate-700 rounded-lg transition-colors ${
                       !isCurrentMonth ? 'opacity-40' : ''
-                    } ${isCurrentDay ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : 'bg-white dark:bg-slate-800/50'}`}
-                    onClick={() => onDateClick(day)}
+                    } ${
+                      isPast
+                        ? 'bg-gray-50 dark:bg-slate-900/50 opacity-60 cursor-not-allowed'
+                        : 'cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                    } ${isCurrentDay ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/30' : isPast ? '' : 'bg-white dark:bg-slate-800/50'}`}
+                    onClick={() => !isPast && onDateClick(day)}
                   >
                     <div
                       className={`text-sm font-medium mb-1 ${
-                        isCurrentDay ? 'text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-slate-200'
+                        isPast
+                          ? 'text-gray-400 dark:text-slate-500'
+                          : isCurrentDay
+                          ? 'text-blue-600 dark:text-blue-400'
+                          : 'text-gray-700 dark:text-slate-200'
                       }`}
                     >
                       {format(day, 'd')}
@@ -389,8 +414,12 @@ export default function CalendarView({
                       </div>
                     ) : (
                       <div
-                        className="p-4 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg text-center text-gray-400 dark:text-slate-500 text-sm cursor-pointer active:scale-[0.98] transition-transform"
-                        onClick={() => onDateClick(day)}
+                        className={`p-4 border-2 border-dashed rounded-lg text-center text-sm transition-transform ${
+                          isPastDate(day)
+                            ? 'border-gray-200 dark:border-slate-700 text-gray-300 dark:text-slate-600 cursor-not-allowed opacity-50'
+                            : 'border-gray-300 dark:border-slate-600 text-gray-400 dark:text-slate-500 cursor-pointer active:scale-[0.98] hover:border-blue-300 dark:hover:border-blue-600'
+                        }`}
+                        onClick={() => !isPastDate(day) && onDateClick(day)}
                       >
                         Tap to add appointment
                       </div>
@@ -401,8 +430,8 @@ export default function CalendarView({
             </div>
 
             {/* Desktop: Grid view */}
-            <div className="hidden sm:grid grid-cols-7 gap-2">
-              {/* Time column */}
+            <div className="hidden sm:grid grid-cols-8 gap-2">
+              {/* Time column header */}
               <div className="col-span-1"></div>
               {weekDays.map((day) => (
                 <div key={day.toISOString()} className="text-center">
@@ -431,14 +460,22 @@ export default function CalendarView({
                       return aptHour === hour
                     })
 
+                    const dateTime = new Date(day)
+                    dateTime.setHours(hour, 0, 0, 0)
+                    const isPast = isPastDateTime(dateTime)
+
                     return (
                       <div
                         key={`${day}-${hour}`}
-                        className="min-h-[60px] p-1 border border-gray-200 dark:border-slate-700 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer bg-white dark:bg-slate-800/30"
+                        className={`min-h-[60px] p-1 border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800/30 ${
+                          isPast
+                            ? 'opacity-50 cursor-not-allowed'
+                            : 'hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer'
+                        }`}
                         onClick={() => {
-                          const date = new Date(day)
-                          date.setHours(hour, 0, 0, 0)
-                          onDateClick(date)
+                          if (!isPast) {
+                            onDateClick(dateTime)
+                          }
                         }}
                       >
                         {dayAppointments.map((apt) => (
@@ -517,8 +554,12 @@ export default function CalendarView({
                         </div>
                       ) : (
                         <div
-                          className="h-full min-h-[60px] border-2 border-dashed border-gray-200 dark:border-slate-600 rounded-lg hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer transition-colors flex items-center justify-center text-gray-400 dark:text-slate-500 text-sm p-4 active:scale-[0.98] touch-manipulation"
-                          onClick={() => onDateClick(hour)}
+                          className={`h-full min-h-[60px] border-2 border-dashed rounded-lg transition-colors flex items-center justify-center text-sm p-4 touch-manipulation ${
+                            isPastDateTime(hour)
+                              ? 'border-gray-200 dark:border-slate-700 text-gray-300 dark:text-slate-600 cursor-not-allowed opacity-50'
+                              : 'border-gray-200 dark:border-slate-600 hover:border-blue-300 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer text-gray-400 dark:text-slate-500 active:scale-[0.98]'
+                          }`}
+                          onClick={() => !isPastDateTime(hour) && onDateClick(hour)}
                         >
                           <span className="hidden sm:inline">Click to add appointment</span>
                           <span className="sm:hidden">Tap to add</span>

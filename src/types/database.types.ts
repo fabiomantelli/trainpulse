@@ -258,6 +258,41 @@ export interface Database {
           created_at?: string
         }
       }
+      notifications: {
+        Row: {
+          id: string
+          trainer_id: string
+          type: 'appointment_upcoming' | 'appointment_reminder' | 'invoice_overdue' | 'invoice_due_soon' | 'client_birthday' | 'workout_reminder' | 'system_update'
+          title: string
+          message: string
+          related_id: string | null
+          related_type: string | null
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          trainer_id: string
+          type: 'appointment_upcoming' | 'appointment_reminder' | 'invoice_overdue' | 'invoice_due_soon' | 'client_birthday' | 'workout_reminder' | 'system_update'
+          title: string
+          message: string
+          related_id?: string | null
+          related_type?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          trainer_id?: string
+          type?: 'appointment_upcoming' | 'appointment_reminder' | 'invoice_overdue' | 'invoice_due_soon' | 'client_birthday' | 'workout_reminder' | 'system_update'
+          title?: string
+          message?: string
+          related_id?: string | null
+          related_type?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

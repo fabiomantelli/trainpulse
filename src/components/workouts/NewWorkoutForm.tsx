@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { Toaster, toast } from 'react-hot-toast'
+import { motion, AnimatePresence } from 'framer-motion'
 import BackButton from '@/components/layout/BackButton'
 import ExerciseLibrary, { Exercise as LibraryExercise } from './ExerciseLibrary'
 
@@ -162,16 +163,22 @@ export default function NewWorkoutForm({ trainerId }: { trainerId: string }) {
                     <button
                       type="button"
                       onClick={() => setShowExerciseLibrary(!showExerciseLibrary)}
-                      className="px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/30 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-all hover:scale-105 active:scale-95 shadow-sm"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
                       {showExerciseLibrary ? 'Hide' : 'Browse'} Library
                     </button>
                     <button
                       type="button"
                       onClick={addExercise}
-                      className="px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-lg hover:from-blue-600 hover:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 transition-all hover:scale-105 active:scale-95 shadow-md hover:shadow-lg"
                     >
-                      + Add Exercise
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                      Add Exercise
                     </button>
                   </div>
                 </div>
@@ -187,39 +194,74 @@ export default function NewWorkoutForm({ trainerId }: { trainerId: string }) {
                 )}
 
                 {exercises.length === 0 ? (
-                  <div className="text-center py-8 border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-lg">
-                    <p className="text-gray-500 dark:text-slate-400 mb-2">No exercises added yet</p>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-center py-12 border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800/50 dark:to-slate-900/50"
+                  >
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-600 dark:text-slate-400 mb-3 font-medium">No exercises added yet</p>
                     <button
                       type="button"
                       onClick={addExercise}
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+                      className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors"
                     >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
                       Add your first exercise
                     </button>
-                  </div>
+                  </motion.div>
                 ) : (
-                  <div className="space-y-4">
-                    {exercises.map((exercise, index) => (
-                      <div
-                        key={index}
-                        className="border border-gray-200 dark:border-slate-700/30 rounded-lg p-4 bg-gray-50 dark:bg-slate-700/30"
-                      >
-                        <div className="flex justify-between items-start mb-3">
-                          <h4 className="text-sm font-medium text-gray-700 dark:text-slate-300">
-                            Exercise {index + 1}
-                          </h4>
-                          <button
-                            type="button"
-                            onClick={() => removeExercise(index)}
-                            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 text-sm font-medium"
-                          >
-                            Remove
-                          </button>
-                        </div>
+                  <div className="space-y-3">
+                    <AnimatePresence mode="popLayout">
+                      {exercises.map((exercise, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                          transition={{ duration: 0.2 }}
+                          className="group relative border border-gray-200 dark:border-slate-700/50 rounded-xl p-5 bg-white dark:bg-slate-800/50 shadow-sm hover:shadow-md transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-600/50"
+                        >
+                          {/* Exercise Number Badge */}
+                          <div className="absolute -top-3 -left-3 w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 flex items-center justify-center text-white text-xs font-bold shadow-lg">
+                            {index + 1}
+                          </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
+                          <div className="flex justify-between items-start mb-4">
+                            <div className="flex-1">
+                              <h4 className="text-sm font-semibold text-gray-900 dark:text-slate-100 mb-1">
+                                Exercise {index + 1}
+                              </h4>
+                              {exercise.name && (
+                                <p className="text-xs text-gray-500 dark:text-slate-400 italic">
+                                  {exercise.name}
+                                </p>
+                              )}
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeExercise(index)}
+                              className="p-2 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                              title="Remove exercise"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          {/* Exercise Name - Full Width */}
+                          <div className="mb-4">
+                            <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                              <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
                               Exercise Name *
                             </label>
                             <input
@@ -227,127 +269,151 @@ export default function NewWorkoutForm({ trainerId }: { trainerId: string }) {
                               required
                               value={exercise.name}
                               onChange={(e) => updateExercise(index, 'name', e.target.value)}
-                              placeholder="e.g., Bench Press"
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
+                              placeholder="e.g., Bench Press, Squat, Running..."
+                              className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm transition-all"
                             />
                           </div>
 
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
-                              Sets
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              value={exercise.sets || ''}
-                              onChange={(e) =>
-                                updateExercise(
-                                  index,
-                                  'sets',
-                                  e.target.value ? parseInt(e.target.value) : 0
-                                )
-                              }
-                              placeholder="3"
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
-                            />
+                          {/* Quick Stats Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+                            <div className="relative">
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                                Sets
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={exercise.sets || ''}
+                                onChange={(e) =>
+                                  updateExercise(
+                                    index,
+                                    'sets',
+                                    e.target.value ? parseInt(e.target.value) : 0
+                                  )
+                                }
+                                placeholder="3"
+                                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
+                              />
+                            </div>
+
+                            <div className="relative">
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
+                                Reps
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={exercise.reps || ''}
+                                onChange={(e) =>
+                                  updateExercise(
+                                    index,
+                                    'reps',
+                                    e.target.value ? parseInt(e.target.value) : 0
+                                  )
+                                }
+                                placeholder="10"
+                                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
+                              />
+                            </div>
+
+                            <div className="relative">
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                                </svg>
+                                Weight (kg)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.5"
+                                value={exercise.weight || ''}
+                                onChange={(e) =>
+                                  updateExercise(
+                                    index,
+                                    'weight',
+                                    e.target.value ? parseFloat(e.target.value) : 0
+                                  )
+                                }
+                                placeholder="20"
+                                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
+                              />
+                            </div>
+
+                            <div className="relative">
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Rest (sec)
+                              </label>
+                              <input
+                                type="number"
+                                min="0"
+                                value={exercise.rest || ''}
+                                onChange={(e) =>
+                                  updateExercise(
+                                    index,
+                                    'rest',
+                                    e.target.value ? parseInt(e.target.value) : 0
+                                  )
+                                }
+                                placeholder="60"
+                                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
+                              />
+                            </div>
                           </div>
 
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
-                              Reps
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              value={exercise.reps || ''}
-                              onChange={(e) =>
-                                updateExercise(
-                                  index,
-                                  'reps',
-                                  e.target.value ? parseInt(e.target.value) : 0
-                                )
-                              }
-                              placeholder="10"
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
-                            />
-                          </div>
+                          {/* Duration and Notes Row */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Duration (min)
+                              </label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={exercise.duration || ''}
+                                onChange={(e) =>
+                                  updateExercise(
+                                    index,
+                                    'duration',
+                                    e.target.value ? parseInt(e.target.value) : 0
+                                  )
+                                }
+                                placeholder="30"
+                                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
+                              />
+                            </div>
 
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
-                              Weight (kg)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.5"
-                              value={exercise.weight || ''}
-                              onChange={(e) =>
-                                updateExercise(
-                                  index,
-                                  'weight',
-                                  e.target.value ? parseFloat(e.target.value) : 0
-                                )
-                              }
-                              placeholder="20"
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
-                            />
+                            <div>
+                              <label className="flex items-center gap-1.5 text-xs font-medium text-gray-600 dark:text-slate-400 mb-1.5">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Notes
+                              </label>
+                              <textarea
+                                value={exercise.notes || ''}
+                                onChange={(e) => updateExercise(index, 'notes', e.target.value)}
+                                placeholder="Add instructions or notes..."
+                                rows={2}
+                                className="w-full px-3 py-2 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm resize-none"
+                              />
+                            </div>
                           </div>
-
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
-                              Duration (minutes)
-                            </label>
-                            <input
-                              type="number"
-                              min="1"
-                              value={exercise.duration || ''}
-                              onChange={(e) =>
-                                updateExercise(
-                                  index,
-                                  'duration',
-                                  e.target.value ? parseInt(e.target.value) : 0
-                                )
-                              }
-                              placeholder="30"
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-medium text-gray-600 dark:text-slate-400 mb-1">
-                              Rest (seconds)
-                            </label>
-                            <input
-                              type="number"
-                              min="0"
-                              value={exercise.rest || ''}
-                              onChange={(e) =>
-                                updateExercise(
-                                  index,
-                                  'rest',
-                                  e.target.value ? parseInt(e.target.value) : 0
-                                )
-                              }
-                              placeholder="60"
-                              className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="mt-3">
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
-                            Notes
-                          </label>
-                          <textarea
-                            value={exercise.notes || ''}
-                            onChange={(e) => updateExercise(index, 'notes', e.target.value)}
-                            placeholder="Add any notes or instructions..."
-                            rows={2}
-                            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm resize-none"
-                          />
-                        </div>
-                      </div>
-                    ))}
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
                   </div>
                 )}
               </div>
