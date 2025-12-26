@@ -34,4 +34,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# cursor debug logs
+.cursor/debug.log
+.cursor/**/*.log
+
 
