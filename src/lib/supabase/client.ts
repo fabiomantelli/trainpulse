@@ -1,6 +1,6 @@
 'use client'
 
-import { createBrowserClient } from '@supabase/ssr'
+import { createBrowserClient, type CookieOptions } from '@supabase/ssr'
 import { Database } from '@/types/database.types'
 
 export const createClient = () => {
@@ -15,7 +15,7 @@ export const createClient = () => {
             return { name, value: decodeURIComponent(rest.join('=')) }
           }).filter(cookie => cookie.name && cookie.value)
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieOptions }>) {
           cookiesToSet.forEach(({ name, value, options }) => {
             // Skip httpOnly cookies - they can only be set by the server
             if (options?.httpOnly) {
