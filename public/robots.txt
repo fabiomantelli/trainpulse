@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /auth/
+Disallow: /dashboard/
+Disallow: /appointments/
+Disallow: /clients/
+Disallow: /workouts/
+Disallow: /invoices/
+
+Sitemap: https://trainpulse.fit/sitemap.xml
+

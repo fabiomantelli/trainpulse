@@ -7,9 +7,35 @@ import ConditionalLayout from '@/components/layout/ConditionalLayout'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const siteUrl = 'https://trainpulse.fit'
+
 export const metadata: Metadata = {
-  title: 'TrainPulse - Your Fitness Business, Simplified',
-  description: 'The all-in-one platform that personal trainers love. Manage clients, schedules, workouts, and payments effortlessly. Scale your fitness business with TrainPulse.',
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: 'TrainPulse - Personal Trainer Software | Fitness Business Management',
+    template: '%s | TrainPulse',
+  },
+  description: 'The all-in-one personal trainer software for fitness professionals in the USA. Manage clients, schedules, workouts, and payments effortlessly. Built by trainers, for trainers.',
+  keywords: [
+    'personal trainer software',
+    'fitness business management',
+    'trainer client management software',
+    'personal trainer scheduling app',
+    'fitness trainer CRM',
+    'gym management software for trainers',
+    'personal training business software',
+    'trainer appointment scheduling',
+    'fitness business software',
+    'personal trainer software USA',
+  ],
+  authors: [{ name: 'TrainPulse' }],
+  creator: 'TrainPulse',
+  publisher: 'TrainPulse',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: '/favicon.ico',
     apple: '/icons/icon-192x192.png',
@@ -31,6 +57,44 @@ export const metadata: Metadata = {
     userScalable: false,
     viewportFit: 'cover',
   },
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: siteUrl,
+    siteName: 'TrainPulse',
+    title: 'TrainPulse - Personal Trainer Software | Fitness Business Management',
+    description: 'The all-in-one personal trainer software for fitness professionals. Manage clients, schedules, workouts, and payments effortlessly.',
+    images: [
+      {
+        url: `${siteUrl}/og-image.jpg`,
+        width: 1200,
+        height: 630,
+        alt: 'TrainPulse - Personal Trainer Software',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'TrainPulse - Personal Trainer Software | Fitness Business Management',
+    description: 'The all-in-one personal trainer software for fitness professionals. Manage clients, schedules, workouts, and payments effortlessly.',
+    images: [`${siteUrl}/twitter-image.jpg`],
+    creator: '@trainpulse', // Update with actual Twitter handle if available
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
+  category: 'Business Software',
 }
 
 export default async function RootLayout({
@@ -43,7 +107,7 @@ export default async function RootLayout({
   const pathname = headersList.get('x-pathname') || headersList.get('x-invoke-path') || '/'
   
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en-US" suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#2563eb" />
