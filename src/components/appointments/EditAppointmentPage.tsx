@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation'
 import AppointmentForm from './AppointmentForm'
 import { Database } from '@/types/database.types'
-import { Toaster } from 'react-hot-toast'
 
 type Appointment = Database['public']['Tables']['appointments']['Row']
 type Client = Database['public']['Tables']['clients']['Row']
@@ -30,7 +29,6 @@ export default function EditAppointmentPage({
 
   return (
     <>
-      <Toaster position="top-right" />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
           <div className="mb-8">

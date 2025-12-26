@@ -59,3 +59,4 @@ CREATE TRIGGER set_updated_at_invoices
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_updated_at();
 
+

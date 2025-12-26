@@ -10,7 +10,6 @@ import CalendarView from './CalendarView'
 import AppointmentCard from './AppointmentCard'
 import AppointmentModal from './AppointmentModal'
 import AppointmentForm from './AppointmentForm'
-import { Toaster } from 'react-hot-toast'
 import toast from 'react-hot-toast'
 
 type Appointment = Database['public']['Tables']['appointments']['Row'] & {
@@ -157,7 +156,6 @@ export default function AppointmentsContent({
 
   return (
     <>
-      <Toaster position="top-right" />
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: 20 }}

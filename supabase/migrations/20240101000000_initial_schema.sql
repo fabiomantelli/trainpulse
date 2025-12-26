@@ -104,3 +104,4 @@ CREATE INDEX IF NOT EXISTS idx_invoices_client_id ON public.invoices(client_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_status ON public.invoices(status);
 CREATE INDEX IF NOT EXISTS idx_payments_invoice_id ON public.payments(invoice_id);
 
+

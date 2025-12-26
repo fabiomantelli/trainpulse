@@ -4,7 +4,6 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import AppointmentForm from './AppointmentForm'
 import { Database } from '@/types/database.types'
-import { Toaster } from 'react-hot-toast'
 import BackButton from '@/components/layout/BackButton'
 
 type Client = Database['public']['Tables']['clients']['Row']
@@ -29,7 +28,6 @@ export default function NewAppointmentPage({
 
   return (
     <>
-      <Toaster position="top-right" />
       <BackButton href="/appointments" />
       <div className="max-w-3xl">
         <div className="mb-8">

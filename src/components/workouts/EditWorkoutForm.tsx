@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
-import { Toaster, toast } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
 import BackButton from '@/components/layout/BackButton'
 import ExerciseLibrary, { Exercise as LibraryExercise } from './ExerciseLibrary'
@@ -98,7 +98,6 @@ export default function EditWorkoutForm({ workout, trainerId }: { workout: Worko
 
   return (
     <>
-      <Toaster position="top-right" />
       <BackButton href={`/workouts/${workout.id}`} />
       <div className="max-w-4xl">
         <div className="mb-5">

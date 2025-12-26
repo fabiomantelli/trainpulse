@@ -107,7 +107,43 @@ export default function AppLayout({ children }: { children: ReactNode }) {
   }
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 4000, // Default 4 seconds
+          className: 'dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700',
+          style: {
+            borderRadius: '0.75rem',
+            padding: '1rem 1.25rem',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+            maxWidth: '420px',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+          },
+          success: {
+            duration: 3000, // Success messages disappear faster (3 seconds)
+            className: 'dark:bg-slate-800 dark:text-slate-100 dark:border-green-800/30',
+            style: {
+              borderLeft: '4px solid #10b981',
+            },
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 5000, // Error messages stay longer (5 seconds)
+            className: 'dark:bg-slate-800 dark:text-slate-100 dark:border-red-800/30',
+            style: {
+              borderLeft: '4px solid #ef4444',
+            },
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <div className="min-h-screen bg-gray-50 dark:bg-slate-950 flex transition-colors duration-200">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (

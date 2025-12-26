@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { Database } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
-import { Toaster } from 'react-hot-toast'
 import { useState } from 'react'
 
 type Appointment = Database['public']['Tables']['appointments']['Row']
@@ -91,7 +90,6 @@ export default function AppointmentDetailPage({
 
   return (
     <>
-      <Toaster position="top-right" />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}

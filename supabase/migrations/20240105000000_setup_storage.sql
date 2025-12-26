@@ -35,3 +35,4 @@ CREATE POLICY "Trainers can delete their client photos"
     AND auth.uid() IS NOT NULL
   );
 
+
