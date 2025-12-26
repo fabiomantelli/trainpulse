@@ -1,6 +1,9 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import AppointmentDetailPage from '@/components/appointments/AppointmentDetailPage'
+import { Database } from '@/types/database.types'
+
+type Appointment = Database['public']['Tables']['appointments']['Row']
 
 export default async function AppointmentDetail({
   params,
@@ -28,11 +31,14 @@ export default async function AppointmentDetail({
     notFound()
   }
 
+  // Type assertion needed because Supabase type inference doesn't work perfectly
+  const typedAppointment = appointment as Appointment
+
   // Load client
   const { data: client, error: clientError } = await supabase
     .from('clients')
     .select('id, name, email, phone, photo_url')
-    .eq('id', appointment.client_id)
+    .eq('id', typedAppointment.client_id)
     .single()
 
   if (clientError || !client) {
@@ -41,7 +47,7 @@ export default async function AppointmentDetail({
 
   return (
     <AppointmentDetailPage
-      appointment={appointment}
+      appointment={typedAppointment}
       client={client}
     />
   )

@@ -1,6 +1,9 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect, notFound } from 'next/navigation'
 import InvoiceDetailPage from '@/components/invoices/InvoiceDetailPage'
+import { Database } from '@/types/database.types'
+
+type Invoice = Database['public']['Tables']['invoices']['Row']
 
 export default async function InvoiceDetail({
   params,
@@ -28,11 +31,14 @@ export default async function InvoiceDetail({
     notFound()
   }
 
+  // Type assertion needed because Supabase type inference doesn't work perfectly
+  const typedInvoice = invoice as Invoice
+
   // Load client
   const { data: client, error: clientError } = await supabase
     .from('clients')
     .select('id, name, email, phone')
-    .eq('id', invoice.client_id)
+    .eq('id', typedInvoice.client_id)
     .single()
 
   if (clientError || !client) {
@@ -48,7 +54,7 @@ export default async function InvoiceDetail({
 
   return (
     <InvoiceDetailPage
-      invoice={invoice}
+      invoice={typedInvoice}
       client={client}
       payments={payments || []}
     />
