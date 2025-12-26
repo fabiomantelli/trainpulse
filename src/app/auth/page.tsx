@@ -131,10 +131,19 @@ function AuthContent() {
     // #endregion
 
     try {
+      // Get the current origin (production URL or localhost in dev)
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const emailRedirectTo = `${currentOrigin}/auth/callback`
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:133',message:'SignUp with emailRedirectTo',data:{currentOrigin,emailRedirectTo,envAppUrl:process.env.NEXT_PUBLIC_APP_URL},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo,
           data: {
             full_name: fullName,
           },
@@ -282,10 +291,21 @@ function AuthContent() {
     setResendingEmail(true)
     setError(null)
     try {
+      // Get the current origin (production URL or localhost in dev)
+      const currentOrigin = typeof window !== 'undefined' ? window.location.origin : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+      const emailRedirectTo = `${currentOrigin}/auth/callback`
+      
       console.log('📧 Resending verification email to:', email)
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/page.tsx:245',message:'Resend email with redirectTo',data:{email,emailRedirectTo,currentOrigin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      
       const { data, error: resendError } = await supabase.auth.resend({
         type: 'signup',
         email: email,
+        options: {
+          emailRedirectTo,
+        },
       })
       
       console.log('📧 Resend response:', { data, error: resendError?.message })
