@@ -10,24 +10,17 @@ export async function GET(request: NextRequest) {
   try {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
+    const token = requestUrl.searchParams.get('token')
+    const type = requestUrl.searchParams.get('type')
     const next = requestUrl.searchParams.get('next') ?? '/dashboard'
     const origin = requestUrl.origin
 
     // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:11',message:'Callback route called',data:{requestUrl:request.url,origin,host:requestUrl.host,protocol:requestUrl.protocol,code:!!code,next,envAppUrl:process.env.NEXT_PUBLIC_APP_URL},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    const allParams = Object.fromEntries(requestUrl.searchParams.entries())
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:11',message:'Callback route called',data:{requestUrl:request.url,origin,host:requestUrl.host,protocol:requestUrl.protocol,code:!!code,token:!!token,type,next,envAppUrl:process.env.NEXT_PUBLIC_APP_URL,allParams},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
     // #endregion
 
-    if (!code) {
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:16',message:'No code provided',data:{origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-      // No code provided
-      return NextResponse.redirect(
-        new URL(`/auth/signin?error=${encodeURIComponent('No authentication code provided')}`, origin)
-      )
-    }
-
-    // Create Supabase client with proper cookie handling for PKCE
+    // Create Supabase client with proper cookie handling
     const cookieStore = cookies()
     const response = NextResponse.redirect(new URL(next, origin))
     
@@ -58,45 +51,96 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-    
-    // #region agent log
-    const cookieHeader = request.headers.get('cookie') || ''
-    const hasPkceCookie = cookieHeader.includes('sb-') && (cookieHeader.includes('code-verifier') || cookieHeader.includes('pkce'))
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:35',message:'Before exchangeCodeForSession',data:{code:!!code,origin,hasCookies:!!cookieHeader,hasPkceCookie,cookieCount:cookieHeader.split(';').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-    
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
-    
-    // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:30',message:'Exchange code response',data:{hasError:!!error,errorMessage:error?.message,hasSession:!!data?.session,origin,redirectTo:`${origin}${next}`,errorCode:error?.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-    
-    if (error) {
+
+    // Handle PKCE flow with code parameter (modern Supabase)
+    if (code) {
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:30',message:'Exchange code error',data:{errorMessage:error.message,origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      const cookieHeader = request.headers.get('cookie') || ''
+      const hasPkceCookie = cookieHeader.includes('sb-') && (cookieHeader.includes('code-verifier') || cookieHeader.includes('pkce'))
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:45',message:'PKCE flow detected, exchanging code',data:{code:!!code,origin,hasCookies:!!cookieHeader,hasPkceCookie,cookieCount:cookieHeader.split(';').length},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
       // #endregion
-      console.error('Error exchanging code for session:', error)
-      return NextResponse.redirect(
-        new URL(`/auth/signin?error=${encodeURIComponent(error.message)}`, origin)
-      )
+      
+      const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:50',message:'Exchange code response',data:{hasError:!!error,errorMessage:error?.message,hasSession:!!data?.session,origin,redirectTo:`${origin}${next}`,errorCode:error?.status},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      
+      if (error) {
+        // #region agent log
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:55',message:'Exchange code error',data:{errorMessage:error.message,origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        console.error('Error exchanging code for session:', error)
+        return NextResponse.redirect(
+          new URL(`/auth/signin?error=${encodeURIComponent(error.message)}`, origin)
+        )
+      }
+
+      if (!data.session) {
+        // #region agent log
+        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:62',message:'No session returned',data:{origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+        // #endregion
+        console.error('No session returned from exchangeCodeForSession')
+        return NextResponse.redirect(
+          new URL(`/auth/signin?error=${encodeURIComponent('Session could not be established')}`, origin)
+        )
+      }
+
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:70',message:'Successful PKCE exchange, redirecting',data:{origin,next,redirectUrl:`${origin}${next}`,hasSession:!!data?.session},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+      // #endregion
+      
+      return response
     }
 
-    if (!data.session) {
+    // Handle token-based flow (older email confirmation)
+    if (token && type) {
       // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:37',message:'No session returned',data:{origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:75',message:'Token-based flow detected',data:{type,token:!!token,origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
       // #endregion
-      console.error('No session returned from exchangeCodeForSession')
-      return NextResponse.redirect(
-        new URL(`/auth/signin?error=${encodeURIComponent('Session could not be established')}`, origin)
-      )
+      
+      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: token,
+        type: type as any,
+      })
+      
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:80',message:'Token verification response',data:{hasError:!!verifyError,errorMessage:verifyError?.message,hasSession:!!verifyData?.session,origin},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+      // #endregion
+      
+      if (verifyError) {
+        return NextResponse.redirect(
+          new URL(`/auth/signin?error=${encodeURIComponent(verifyError.message)}`, origin)
+        )
+      }
+
+      if (verifyData?.session) {
+        return response
+      }
     }
 
+    // No code or token - check if user already has a session (email might already be confirmed)
     // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:65',message:'Successful exchange, redirecting',data:{origin,next,redirectUrl:`${origin}${next}`,hasSession:!!data?.session},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:95',message:'No code or token, checking existing session',data:{origin,allParams},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
     // #endregion
+    
+    const { data: { session } } = await supabase.auth.getSession()
+    
+    if (session) {
+      // #region agent log
+      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:100',message:'Existing session found, redirecting',data:{origin,next,hasSession:!!session},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+      // #endregion
+      return response
+    }
 
-    // Successful exchange - redirect to dashboard with cookies
-    return response
+    // No code, no token, no session - redirect to signin with error
+    // #region agent log
+    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/callback/route.ts:105',message:'No authentication method found',data:{origin,allParams},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
+    // #endregion
+    
+    return NextResponse.redirect(
+      new URL(`/auth/signin?error=${encodeURIComponent('No authentication code provided. Please click the confirmation link from your email.')}`, origin)
+    )
   } catch (error) {
     console.error('Unexpected error in callback:', error)
     const requestUrl = new URL(request.url)
