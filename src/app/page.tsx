@@ -141,33 +141,33 @@ export default async function Home({
         </div>
 
         {/* How It Works Section */}
-        <section className="mt-20 w-full max-w-5xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-gray-100">
+        <section className="mt-20 w-full max-w-5xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-gray-100 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             How It Works
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="text-center">
+            <div className="text-center animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
               <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
                 1
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Sign Up Free</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Create your account in seconds. No credit card required to get started.</p>
             </div>
-            <div className="text-center">
+            <div className="text-center animate-fade-in-up" style={{ animationDelay: '0.75s' }}>
               <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
                 2
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Add Your Clients</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Import or add your clients. Track their progress and engagement easily.</p>
             </div>
-            <div className="text-center">
+            <div className="text-center animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
               <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-pink-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
                 3
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">Schedule Appointments</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Manage your calendar and set up recurring appointments with reminders.</p>
             </div>
-            <div className="text-center">
+            <div className="text-center animate-fade-in-up" style={{ animationDelay: '0.85s' }}>
               <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white text-2xl font-bold">
                 4
               </div>
@@ -178,12 +178,12 @@ export default async function Home({
         </section>
 
         {/* FAQ Section */}
-        <section className="mt-20 w-full max-w-4xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.7s' }}>
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-gray-100">
+        <section className="mt-20 w-full max-w-4xl mx-auto">
+          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-gray-100 animate-fade-in-up" style={{ animationDelay: '0.9s' }}>
             Frequently Asked Questions
           </h2>
           <div className="space-y-6">
-            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6">
+            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6 animate-fade-in-up" style={{ animationDelay: '1s' }}>
               <summary className="font-semibold text-gray-900 dark:text-gray-100 cursor-pointer">
                 What is TrainPulse?
               </summary>
@@ -191,7 +191,7 @@ export default async function Home({
                 TrainPulse is a comprehensive personal trainer software and fitness business management platform designed specifically for fitness professionals. It helps trainers manage clients, schedules, workouts, and payments all in one place.
               </p>
             </details>
-            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6">
+            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6 animate-fade-in-up" style={{ animationDelay: '1.05s' }}>
               <summary className="font-semibold text-gray-900 dark:text-gray-100 cursor-pointer">
                 Who can use TrainPulse?
               </summary>
@@ -199,7 +199,7 @@ export default async function Home({
                 TrainPulse is designed for personal trainers, fitness coaches, and independent fitness professionals who want to streamline their business operations. It's perfect for trainers managing their own clients and schedules.
               </p>
             </details>
-            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6">
+            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6 animate-fade-in-up" style={{ animationDelay: '1.1s' }}>
               <summary className="font-semibold text-gray-900 dark:text-gray-100 cursor-pointer">
                 Do I need to install software to use TrainPulse?
               </summary>
@@ -207,7 +207,7 @@ export default async function Home({
                 No installation required! TrainPulse is a web-based application that works in your browser. You can also install it as a Progressive Web App (PWA) on your mobile device or desktop for app-like experience and offline access.
               </p>
             </details>
-            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6">
+            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6 animate-fade-in-up" style={{ animationDelay: '1.15s' }}>
               <summary className="font-semibold text-gray-900 dark:text-gray-100 cursor-pointer">
                 Can I manage my clients and appointments with TrainPulse?
               </summary>
@@ -215,7 +215,7 @@ export default async function Home({
                 Yes! TrainPulse includes comprehensive client management features where you can track client information, history, and engagement. You can also schedule appointments, manage your calendar, and set up automated reminders to never miss a session.
               </p>
             </details>
-            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6">
+            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6 animate-fade-in-up" style={{ animationDelay: '1.2s' }}>
               <summary className="font-semibold text-gray-900 dark:text-gray-100 cursor-pointer">
                 Does TrainPulse work offline?
               </summary>
@@ -223,7 +223,7 @@ export default async function Home({
                 Yes, TrainPulse works offline! As a Progressive Web App, you can access your cached data even without an internet connection. Perfect for viewing client information and schedules when you're at the gym without WiFi.
               </p>
             </details>
-            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6">
+            <details className="bg-white/60 dark:bg-slate-800/60 backdrop-blur-sm rounded-xl border border-gray-200/50 dark:border-slate-700/50 p-6 animate-fade-in-up" style={{ animationDelay: '1.25s' }}>
               <summary className="font-semibold text-gray-900 dark:text-gray-100 cursor-pointer">
                 How do I get started with TrainPulse?
               </summary>
