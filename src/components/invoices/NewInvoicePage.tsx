@@ -57,8 +57,8 @@ export default function NewInvoicePage({ trainerId, clients }: NewInvoicePagePro
       }
 
       // Insert invoice and get the created invoice data
-      const { data: newInvoice, error: insertError } = await supabase
-        .from('invoices')
+      const { data: newInvoice, error: insertError } = await (supabase
+        .from('invoices') as any)
         .insert(invoiceData)
         .select()
         .single()
@@ -67,8 +67,8 @@ export default function NewInvoicePage({ trainerId, clients }: NewInvoicePagePro
 
       // If status is paid, create payment record
       if (status === 'paid' && newInvoice) {
-        const { data: newPayment, error: paymentError } = await supabase
-          .from('payments')
+        const { data: newPayment, error: paymentError } = await (supabase
+          .from('payments') as any)
           .insert({
             invoice_id: newInvoice.id,
             trainer_id: trainerId,

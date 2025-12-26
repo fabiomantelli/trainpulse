@@ -77,12 +77,13 @@ export default function RevenueCharts({ trainerId }: RevenueChartsProps) {
       })
 
       // Load payments for last 6 months
-      const { data: payments } = await supabase
-        .from('payments')
+      const { data } = await (supabase
+        .from('payments') as any)
         .select('amount, created_at')
         .eq('trainer_id', trainerId)
         .gte('created_at', sixMonthsAgo.toISOString())
         .order('created_at', { ascending: true })
+      const payments = data as Array<{ amount: number; created_at: string }> | null
 
       // Group by month
       const monthlyData = months.map((month) => {
@@ -104,10 +105,11 @@ export default function RevenueCharts({ trainerId }: RevenueChartsProps) {
       setMonthlyRevenue(monthlyData)
 
       // Load invoice status data
-      const { data: invoices } = await supabase
-        .from('invoices')
+      const { data: invoiceData } = await (supabase
+        .from('invoices') as any)
         .select('status, amount')
         .eq('trainer_id', trainerId)
+      const invoices = invoiceData as Array<{ status: string; amount: number }> | null
 
       const statusCounts: Record<string, number> = {}
       invoices?.forEach((inv) => {

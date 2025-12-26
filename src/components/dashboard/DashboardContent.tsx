@@ -35,7 +35,7 @@ export default function DashboardContent({ userId }: { userId: string }) {
   useEffect(() => {
     async function loadStats() {
       try {
-        const { data, error } = await supabase.rpc('get_trainer_stats', {
+        const { data, error } = await (supabase as any).rpc('get_trainer_stats', {
           p_trainer_id: userId,
         })
 

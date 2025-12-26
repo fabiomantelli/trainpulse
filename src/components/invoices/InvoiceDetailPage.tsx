@@ -55,10 +55,11 @@ export default function InvoiceDetailPage({
         console.log('Creating payment for invoice:', invoice.id)
         
         // Check if payment already exists for this invoice
-        const { data: existingPayments, error: checkError } = await supabase
-          .from('payments')
+        const { data: paymentData, error: checkError } = await (supabase
+          .from('payments') as any)
           .select('id, amount')
           .eq('invoice_id', invoice.id)
+        const existingPayments = paymentData as Array<{ id: string; amount: number }> | null
 
         if (checkError) {
           console.error('Error checking existing payments:', checkError)
@@ -87,8 +88,8 @@ export default function InvoiceDetailPage({
           console.log('Inserting payment:', paymentData)
           
           // Create payment record with manual ID
-          const { data: newPayment, error: paymentError } = await supabase
-            .from('payments')
+          const { data: newPayment, error: paymentError } = await (supabase
+            .from('payments') as any)
             .insert(paymentData)
             .select()
             .single()
@@ -114,8 +115,8 @@ export default function InvoiceDetailPage({
         updateData.paid_at = new Date().toISOString()
       }
 
-      const { error } = await supabase
-        .from('invoices')
+      const { error } = await (supabase
+        .from('invoices') as any)
         .update(updateData)
         .eq('id', invoice.id)
 

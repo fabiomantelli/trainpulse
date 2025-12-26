@@ -66,7 +66,7 @@ export default function NewWorkoutForm({ trainerId }: { trainerId: string }) {
     // Filter out exercises with empty names
     const validExercises = exercises.filter((ex) => ex.name.trim())
 
-    const { error: insertError } = await supabase.from('workouts').insert({
+    const { error: insertError } = await (supabase.from('workouts') as any).insert({
       trainer_id: trainerId,
       name: name.trim(),
       description: description.trim() || null,

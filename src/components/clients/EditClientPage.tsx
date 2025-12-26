@@ -92,8 +92,8 @@ export default function EditClientPage({ client, trainerId }: EditClientPageProp
     setError(null)
 
     try {
-      const { error: updateError } = await supabase
-        .from('clients')
+      const { error: updateError } = await (supabase
+        .from('clients') as any)
         .update({
           name,
           email: email || null,

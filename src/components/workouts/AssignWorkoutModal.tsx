@@ -90,7 +90,7 @@ export default function AssignWorkoutModal({
       }
 
       // Create workout session
-      const { error } = await supabase.from('workout_sessions').insert({
+      const { error } = await (supabase.from('workout_sessions') as any).insert({
         trainer_id: trainerId,
         client_id: selectedClientId,
         workout_id: selectedWorkoutId,

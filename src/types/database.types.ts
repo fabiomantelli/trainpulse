@@ -197,6 +197,67 @@ export interface Database {
           updated_at?: string
         }
       }
+      workout_sessions: {
+        Row: {
+          id: string
+          trainer_id: string
+          client_id: string
+          workout_id: string | null
+          completed_at: string
+          exercises_completed: Json
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          trainer_id: string
+          client_id: string
+          workout_id?: string | null
+          completed_at?: string
+          exercises_completed?: Json
+          notes?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          trainer_id?: string
+          client_id?: string
+          workout_id?: string | null
+          completed_at?: string
+          exercises_completed?: Json
+          notes?: string | null
+          created_at?: string
+        }
+      }
+      payments: {
+        Row: {
+          id: string
+          invoice_id: string
+          trainer_id: string
+          client_id: string
+          amount: number
+          stripe_payment_id: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          invoice_id: string
+          trainer_id: string
+          client_id: string
+          amount: number
+          stripe_payment_id: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          invoice_id?: string
+          trainer_id?: string
+          client_id?: string
+          amount?: number
+          stripe_payment_id?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

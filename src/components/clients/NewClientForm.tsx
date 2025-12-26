@@ -21,7 +21,7 @@ export default function NewClientForm({ trainerId }: { trainerId: string }) {
     setLoading(true)
     setError(null)
 
-    const { error: insertError } = await supabase.from('clients').insert({
+    const { error: insertError } = await (supabase.from('clients') as any).insert({
       trainer_id: trainerId,
       name,
       email: email || null,

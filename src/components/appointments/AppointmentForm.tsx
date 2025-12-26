@@ -93,10 +93,11 @@ export default function AppointmentForm({
       query = query.neq('id', appointment.id)
     }
     
-    const { data: existing } = await query
+    const { data } = await query
+    const existing = data as Array<{ id: string; scheduled_at: string; duration_minutes: number }> | null
 
     if (existing) {
-      const hasConflict = (existing as Array<{ id: string; scheduled_at: string; duration_minutes: number }>).some((apt) => {
+      const hasConflict = existing.some((apt) => {
         const aptStart = new Date(apt.scheduled_at)
         const aptEnd = new Date(
           aptStart.getTime() + apt.duration_minutes * 60000
