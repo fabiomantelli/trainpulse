@@ -42,7 +42,7 @@ export default function AppointmentModal({
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <Dialog.Panel className="w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl dark:shadow-slate-900/50 border border-gray-200 dark:border-slate-700 overflow-hidden">
               {/* Header */}
               <div className="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 flex items-center justify-between">
                 <Dialog.Title className="text-xl font-semibold text-white">
@@ -69,7 +69,7 @@ export default function AppointmentModal({
               </div>
 
               {/* Content */}
-              <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+              <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto bg-white dark:bg-slate-800">
                 {children}
               </div>
             </Dialog.Panel>
