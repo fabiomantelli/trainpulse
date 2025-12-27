@@ -10,6 +10,9 @@ export default function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [fullName, setFullName] = useState('')
+  const [state, setState] = useState('')
+  const [city, setCity] = useState('')
+  const [zipCode, setZipCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showVerification, setShowVerification] = useState(false)
@@ -70,6 +73,18 @@ export default function SignUpPage() {
           },
         },
       })
+
+      // Update profile with location data if user was created
+      if (data?.user && (state || city || zipCode)) {
+        await (supabase
+          .from('profiles') as any)
+          .update({
+            state: state || null,
+            city: city || null,
+            zip_code: zipCode || null,
+          })
+          .eq('id', data.user.id)
+      }
 
       // #region agent log
       fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:43',message:'signUp response',data:{hasError:!!error,errorMessage:error?.message,hasData:!!data,hasUser:!!data?.user,hasSession:!!data?.session,userId:data?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
@@ -377,6 +392,105 @@ export default function SignUpPage() {
                         </div>
                       </motion.div>
                     )}
+                  </div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400 mt-2">
+                    <p>Location information (optional, can be added later)</p>
+                  </div>
+                  <div>
+                    <label htmlFor="state" className="sr-only">
+                      State
+                    </label>
+                    <select
+                      id="state"
+                      name="state"
+                      className="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all hover:border-gray-400 dark:hover:border-slate-500"
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      disabled={loading}
+                    >
+                      <option value="">State (optional)</option>
+                      <option value="AL">Alabama</option>
+                      <option value="AK">Alaska</option>
+                      <option value="AZ">Arizona</option>
+                      <option value="AR">Arkansas</option>
+                      <option value="CA">California</option>
+                      <option value="CO">Colorado</option>
+                      <option value="CT">Connecticut</option>
+                      <option value="DE">Delaware</option>
+                      <option value="FL">Florida</option>
+                      <option value="GA">Georgia</option>
+                      <option value="HI">Hawaii</option>
+                      <option value="ID">Idaho</option>
+                      <option value="IL">Illinois</option>
+                      <option value="IN">Indiana</option>
+                      <option value="IA">Iowa</option>
+                      <option value="KS">Kansas</option>
+                      <option value="KY">Kentucky</option>
+                      <option value="LA">Louisiana</option>
+                      <option value="ME">Maine</option>
+                      <option value="MD">Maryland</option>
+                      <option value="MA">Massachusetts</option>
+                      <option value="MI">Michigan</option>
+                      <option value="MN">Minnesota</option>
+                      <option value="MS">Mississippi</option>
+                      <option value="MO">Missouri</option>
+                      <option value="MT">Montana</option>
+                      <option value="NE">Nebraska</option>
+                      <option value="NV">Nevada</option>
+                      <option value="NH">New Hampshire</option>
+                      <option value="NJ">New Jersey</option>
+                      <option value="NM">New Mexico</option>
+                      <option value="NY">New York</option>
+                      <option value="NC">North Carolina</option>
+                      <option value="ND">North Dakota</option>
+                      <option value="OH">Ohio</option>
+                      <option value="OK">Oklahoma</option>
+                      <option value="OR">Oregon</option>
+                      <option value="PA">Pennsylvania</option>
+                      <option value="RI">Rhode Island</option>
+                      <option value="SC">South Carolina</option>
+                      <option value="SD">South Dakota</option>
+                      <option value="TN">Tennessee</option>
+                      <option value="TX">Texas</option>
+                      <option value="UT">Utah</option>
+                      <option value="VT">Vermont</option>
+                      <option value="VA">Virginia</option>
+                      <option value="WA">Washington</option>
+                      <option value="WV">West Virginia</option>
+                      <option value="WI">Wisconsin</option>
+                      <option value="WY">Wyoming</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="city" className="sr-only">
+                      City
+                    </label>
+                    <input
+                      id="city"
+                      name="city"
+                      type="text"
+                      className="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all hover:border-gray-400 dark:hover:border-slate-500"
+                      placeholder="City (optional)"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      disabled={loading}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="zipCode" className="sr-only">
+                      ZIP Code
+                    </label>
+                    <input
+                      id="zipCode"
+                      name="zipCode"
+                      type="text"
+                      pattern="[0-9]{5}(-[0-9]{4})?"
+                      className="appearance-none relative block w-full px-3 py-3 border border-gray-300 dark:border-slate-600 placeholder-gray-500 dark:placeholder-slate-400 text-gray-900 dark:text-white bg-white dark:bg-slate-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all hover:border-gray-400 dark:hover:border-slate-500"
+                      placeholder="ZIP Code (optional)"
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value)}
+                      disabled={loading}
+                    />
                   </div>
                 </div>
 

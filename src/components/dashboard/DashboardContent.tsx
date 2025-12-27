@@ -2,6 +2,10 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import SubscriptionBanner from '@/components/subscription/SubscriptionBanner'
+import WelcomeBanner from '@/components/onboarding/WelcomeBanner'
+import FeatureHighlights from '@/components/growth/FeatureHighlights'
+import SocialProof from '@/components/growth/SocialProof'
 import Link from 'next/link'
 import { format, startOfDay, endOfDay, isToday } from 'date-fns'
 import { motion } from 'framer-motion'
@@ -25,7 +29,15 @@ type Payment = Database['public']['Tables']['payments']['Row'] & {
   client_name?: string
 }
 
-export default function DashboardContent({ userId }: { userId: string }) {
+type Profile = Database['public']['Tables']['profiles']['Row']
+
+export default function DashboardContent({
+  userId,
+  profile,
+}: {
+  userId: string
+  profile?: Profile
+}) {
   const [stats, setStats] = useState<Stats | null>(null)
   const [todayAppointments, setTodayAppointments] = useState<Appointment[]>([])
   const [recentPayments, setRecentPayments] = useState<Payment[]>([])
@@ -240,6 +252,10 @@ export default function DashboardContent({ userId }: { userId: string }) {
 
   return (
     <>
+      {profile && <SubscriptionBanner profile={profile} />}
+      {profile && <WelcomeBanner profile={profile} />}
+      {profile && <FeatureHighlights profile={profile} />}
+      <SocialProof />
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -385,13 +401,36 @@ export default function DashboardContent({ userId }: { userId: string }) {
               </Link>
             </div>
             {todayAppointments.length === 0 ? (
-              <div className="text-center py-3">
-                <p className="text-gray-500 dark:text-slate-400 text-sm">No appointments scheduled for today</p>
+              <div className="text-center py-6">
+                <svg
+                  className="w-12 h-12 text-gray-400 dark:text-slate-600 mx-auto mb-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-2">
+                  No appointments scheduled for today
+                </p>
                 <Link
                   href="/appointments/new"
-                  className="mt-3 inline-block text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
-                  Schedule one →
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Schedule Appointment
                 </Link>
               </div>
             ) : (
@@ -453,13 +492,36 @@ export default function DashboardContent({ userId }: { userId: string }) {
               </Link>
             </div>
             {recentPayments.length === 0 ? (
-              <div className="text-center py-3">
-                <p className="text-gray-500 dark:text-slate-400 text-sm">No recent payments</p>
+              <div className="text-center py-6">
+                <svg
+                  className="w-12 h-12 text-gray-400 dark:text-slate-600 mx-auto mb-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <p className="text-gray-500 dark:text-slate-400 text-sm mb-2">
+                  No recent payments
+                </p>
                 <Link
                   href="/invoices/new"
-                  className="mt-3 inline-block text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
                 >
-                  Create invoice →
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  Create Invoice
                 </Link>
               </div>
             ) : (

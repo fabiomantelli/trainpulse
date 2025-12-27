@@ -12,6 +12,13 @@ export default async function NewInvoice() {
     redirect('/auth/signin')
   }
 
+  // Load trainer profile
+  const { data: trainerProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
   // Load clients
   const { data: clients, error: clientsError } = await supabase
     .from('clients')
@@ -23,7 +30,7 @@ export default async function NewInvoice() {
     console.error('Error loading clients:', clientsError)
   }
 
-  return <NewInvoicePage trainerId={user.id} clients={clients || []} />
+  return <NewInvoicePage trainerId={user.id} clients={clients || []} trainerProfile={trainerProfile || undefined} />
 }
 
 

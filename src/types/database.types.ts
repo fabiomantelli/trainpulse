@@ -22,6 +22,13 @@ export interface Database {
           subscription_tier: 'starter' | 'pro' | 'enterprise'
           subscription_status: 'active' | 'cancelled' | 'past_due' | 'trialing'
           stripe_customer_id: string | null
+          stripe_account_id: string | null
+          stripe_subscription_id: string | null
+          trial_ends_at: string | null
+          is_early_adopter: boolean
+          state: string | null
+          city: string | null
+          zip_code: string | null
           client_limit: number
           created_at: string
           updated_at: string
@@ -34,6 +41,13 @@ export interface Database {
           subscription_tier?: 'starter' | 'pro' | 'enterprise'
           subscription_status?: 'active' | 'cancelled' | 'past_due' | 'trialing'
           stripe_customer_id?: string | null
+          stripe_account_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          is_early_adopter?: boolean
+          state?: string | null
+          city?: string | null
+          zip_code?: string | null
           client_limit?: number
           created_at?: string
           updated_at?: string
@@ -46,6 +60,13 @@ export interface Database {
           subscription_tier?: 'starter' | 'pro' | 'enterprise'
           subscription_status?: 'active' | 'cancelled' | 'past_due' | 'trialing'
           stripe_customer_id?: string | null
+          stripe_account_id?: string | null
+          stripe_subscription_id?: string | null
+          trial_ends_at?: string | null
+          is_early_adopter?: boolean
+          state?: string | null
+          city?: string | null
+          zip_code?: string | null
           client_limit?: number
           created_at?: string
           updated_at?: string
@@ -62,6 +83,10 @@ export interface Database {
           notes: string | null
           goals: string | null
           medical_notes: string | null
+          state: string | null
+          city: string | null
+          zip_code: string | null
+          date_of_birth: string | null
           created_at: string
           updated_at: string
         }
@@ -75,6 +100,10 @@ export interface Database {
           notes?: string | null
           goals?: string | null
           medical_notes?: string | null
+          state?: string | null
+          city?: string | null
+          zip_code?: string | null
+          date_of_birth?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -88,6 +117,10 @@ export interface Database {
           notes?: string | null
           goals?: string | null
           medical_notes?: string | null
+          state?: string | null
+          city?: string | null
+          zip_code?: string | null
+          date_of_birth?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -169,6 +202,7 @@ export interface Database {
           due_date: string | null
           paid_at: string | null
           stripe_payment_intent_id: string | null
+          stripe_invoice_id: string | null
           created_at: string
           updated_at: string
         }
@@ -181,6 +215,7 @@ export interface Database {
           due_date?: string | null
           paid_at?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_invoice_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -193,6 +228,7 @@ export interface Database {
           due_date?: string | null
           paid_at?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_invoice_id?: string | null
           created_at?: string
           updated_at?: string
         }

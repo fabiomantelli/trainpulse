@@ -282,8 +282,14 @@ export function useNotifications(trainerId: string | null) {
               createdAt: notif.created_at,
               isRead: !!notif.read_at,
               href: notif.related_id && notif.related_type
-                ? `/${notif.related_type}s/${notif.related_id}`
-                : undefined,
+                ? notif.related_type === 'subscription'
+                  ? '/subscription'
+                  : `/${notif.related_type}s/${notif.related_id}`
+                : notif.related_type === 'subscription'
+                  ? '/subscription'
+                  : notif.related_type === 'onboarding'
+                    ? '/dashboard'
+                    : undefined,
             })
             seenIds.add(notif.id)
           }

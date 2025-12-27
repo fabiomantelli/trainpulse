@@ -12,6 +12,13 @@ export default async function DashboardPage() {
     redirect('/auth/signin')
   }
 
-  return <DashboardContent userId={user.id} />
+  // Load user profile for subscription banner
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  return <DashboardContent userId={user.id} profile={profile || undefined} />
 }
 
