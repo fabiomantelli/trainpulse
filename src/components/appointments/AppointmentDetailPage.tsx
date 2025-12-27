@@ -16,7 +16,7 @@ type Client = Database['public']['Tables']['clients']['Row']
 const statusColors = {
   scheduled: 'bg-gradient-to-r from-blue-500 to-blue-600',
   completed: 'bg-gradient-to-r from-green-500 to-green-600',
-  cancelled: 'bg-gray-400',
+  cancelled: 'bg-gray-400 dark:bg-gray-600',
   no_show: 'bg-gradient-to-r from-orange-500 to-orange-600',
 }
 
@@ -90,7 +90,7 @@ export default function AppointmentDetailPage({
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-900 dark:to-slate-800 p-4 md:p-8">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
           <div className="mb-8">
@@ -120,7 +120,7 @@ export default function AppointmentDetailPage({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl overflow-hidden"
+            className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl dark:shadow-slate-900/50 border border-gray-200 dark:border-slate-700 overflow-hidden"
           >
             {/* Status Header */}
             <div

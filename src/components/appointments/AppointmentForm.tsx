@@ -277,17 +277,17 @@ export default function AppointmentForm({
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Client Selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Client *
         </label>
         {clients.length === 0 ? (
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800 mb-2">
+          <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <p className="text-sm text-yellow-800 dark:text-yellow-200 mb-2">
               No clients found. Please create a client first.
             </p>
             <a
               href="/clients/new"
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
             >
               Create a new client →
             </a>
@@ -305,10 +305,10 @@ export default function AppointmentForm({
                     setClientSearch('')
                   }
                 }}
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800"
               />
               {(clientSearch || (!selectedClientId && clients.length > 0)) && filteredClients.length > 0 && (
-                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto">
+                <div className="absolute z-10 w-full mt-1 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg shadow-lg dark:shadow-slate-900/50 max-h-60 overflow-auto">
                   {filteredClients.map((client) => (
                     <button
                       key={client.id}
@@ -317,7 +317,7 @@ export default function AppointmentForm({
                         setSelectedClientId(client.id)
                         setClientSearch(client.name)
                       }}
-                      className="w-full px-4 py-2 text-left hover:bg-blue-50 transition-colors text-gray-900"
+                      className="w-full px-4 py-2 text-left hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors text-gray-900 dark:text-slate-100"
                     >
                       <div className="flex items-center gap-3">
                         {client.photo_url ? (
@@ -340,8 +340,8 @@ export default function AppointmentForm({
             </div>
             {selectedClient && (
               <div className="mt-2 flex items-center gap-2 text-sm">
-                <span className="text-gray-600">Selected:</span>
-                <span className="font-medium text-gray-900 bg-blue-50 px-3 py-1 rounded-lg">
+                <span className="text-gray-600 dark:text-gray-400">Selected:</span>
+                <span className="font-medium text-gray-900 dark:text-slate-100 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
                   {selectedClient.name}
                 </span>
                 <button
@@ -350,7 +350,7 @@ export default function AppointmentForm({
                     setSelectedClientId('')
                     setClientSearch('')
                   }}
-                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm font-medium"
                 >
                   Change
                 </button>
@@ -362,7 +362,7 @@ export default function AppointmentForm({
 
       {/* Date Picker */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Date *
         </label>
         <input
@@ -387,7 +387,7 @@ export default function AppointmentForm({
             }
           }}
           min={format(new Date(), 'yyyy-MM-dd')}
-          className="w-full px-4 py-2.5 bg-white border border-gray-300 rounded-lg shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-gray-900"
+          className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-gray-300 dark:border-slate-700 rounded-lg shadow-sm hover:border-blue-500 dark:hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 transition-colors text-gray-900 dark:text-slate-100"
         />
       </div>
 
@@ -403,7 +403,7 @@ export default function AppointmentForm({
       {/* Status (only for editing) */}
       {appointment && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Status
           </label>
           <select
@@ -417,7 +417,7 @@ export default function AppointmentForm({
                   | 'no_show'
               )
             }
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+            className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800"
           >
             <option value="scheduled">Scheduled</option>
             <option value="completed">Completed</option>
@@ -429,16 +429,16 @@ export default function AppointmentForm({
 
       {/* Recurring Appointment (only for new appointments) */}
       {!appointment && (
-        <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
           <div className="flex items-center">
             <input
               type="checkbox"
               id="isRecurring"
               checked={isRecurring}
               onChange={(e) => setIsRecurring(e.target.checked)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+              className="w-4 h-4 text-blue-600 border-gray-300 dark:border-slate-600 rounded focus:ring-blue-500 dark:bg-slate-800"
             />
-            <label htmlFor="isRecurring" className="ml-2 text-sm font-medium text-gray-700">
+            <label htmlFor="isRecurring" className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300">
               Recurring appointment
             </label>
           </div>
@@ -446,13 +446,13 @@ export default function AppointmentForm({
           {isRecurring && (
             <div className="space-y-3 pl-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Frequency
                 </label>
                 <select
                   value={recurrenceFrequency}
                   onChange={(e) => setRecurrenceFrequency(e.target.value as any)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800"
                 >
                   <option value="daily">Daily</option>
                   <option value="weekly">Weekly</option>
@@ -462,7 +462,7 @@ export default function AppointmentForm({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Number of Occurrences
                 </label>
                 <input
@@ -471,9 +471,9 @@ export default function AppointmentForm({
                   max="52"
                   value={numberOfOccurrences}
                   onChange={(e) => setNumberOfOccurrences(parseInt(e.target.value) || 2)}
-                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 bg-white"
+                  className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800"
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   {numberOfOccurrences} appointments will be created
                 </p>
               </div>
@@ -484,14 +484,14 @@ export default function AppointmentForm({
 
       {/* Notes */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
           Notes
         </label>
         <textarea
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={4}
-          className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none text-gray-900 bg-white"
+          className="w-full px-4 py-2.5 border border-gray-300 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 resize-none text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800"
           placeholder="Add any notes about this appointment..."
         />
       </div>
@@ -501,7 +501,7 @@ export default function AppointmentForm({
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm text-orange-800"
+          className="p-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg text-sm text-orange-800 dark:text-orange-200"
         >
           {conflictError}
         </motion.div>
@@ -523,7 +523,7 @@ export default function AppointmentForm({
         <button
           type="button"
           onClick={onCancel}
-          className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+          className="px-6 py-3 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-200 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
         >
           Cancel
         </button>
