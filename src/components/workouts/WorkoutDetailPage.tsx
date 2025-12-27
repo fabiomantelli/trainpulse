@@ -15,6 +15,7 @@ interface WorkoutDetailPageProps {
 export default function WorkoutDetailPage({ workout, trainerId }: WorkoutDetailPageProps) {
   const exercises = Array.isArray(workout.exercises) ? workout.exercises : []
 
+
   return (
     <>
       <BackButton href="/workouts" />

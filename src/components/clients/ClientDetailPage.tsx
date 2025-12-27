@@ -39,6 +39,7 @@ export default function ClientDetailPage({
   const [deleting, setDeleting] = useState(false)
   const [showAssignWorkoutModal, setShowAssignWorkoutModal] = useState(false)
 
+
   const handleDelete = async () => {
     if (!confirm('Are you sure you want to delete this client? This action cannot be undone.')) {
       return

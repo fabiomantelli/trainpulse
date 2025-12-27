@@ -38,20 +38,6 @@ export default function AppointmentDetailPage({
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
 
-  // Ensure dark mode is preserved when navigating to this page
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const savedTheme = localStorage.getItem('theme')
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      const shouldBeDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark)
-      
-      if (shouldBeDark) {
-        document.documentElement.classList.add('dark')
-      } else {
-        document.documentElement.classList.remove('dark')
-      }
-    }
-  }, [])
 
   const scheduledDate = new Date(appointment.scheduled_at)
   const endTime = new Date(

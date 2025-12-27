@@ -31,23 +31,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme)
   const [mounted, setMounted] = useState(false)
 
-  useEffect(() => {
-    setMounted(true)
-    // Sync with the script that already applied the theme
-    // Check localStorage first
-    const savedTheme = localStorage.getItem('theme') as Theme | null
-    if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
-      setThemeState(savedTheme)
-      // Theme already applied by inline script, just sync state
-    } else {
-      // Detect system preference (script already applied it, just sync state)
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      const initialTheme = systemPrefersDark ? 'dark' : 'light'
-      setThemeState(initialTheme)
-    }
-  }, [])
-
+  // Helper function to apply theme to document
   const applyTheme = (newTheme: Theme) => {
+    if (typeof window === 'undefined') return
     const root = document.documentElement
     if (newTheme === 'dark') {
       root.classList.add('dark')
@@ -55,6 +41,60 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       root.classList.remove('dark')
     }
   }
+
+  useEffect(() => {
+    setMounted(true)
+    
+    // Always ensure theme is applied on mount (handles client-side navigation)
+    const syncAndApplyTheme = () => {
+      const savedTheme = localStorage.getItem('theme') as Theme | null
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      
+      let currentTheme: Theme
+      if (savedTheme && (savedTheme === 'light' || savedTheme === 'dark')) {
+        currentTheme = savedTheme
+      } else {
+        currentTheme = systemPrefersDark ? 'dark' : 'light'
+      }
+      
+      // Apply theme to document (ensures it works after client-side navigation)
+      applyTheme(currentTheme)
+      setThemeState(currentTheme)
+    }
+    
+    syncAndApplyTheme()
+    
+    // Listen for storage changes (e.g., theme changed in another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'theme' && e.newValue) {
+        const newTheme = e.newValue as Theme
+        if (newTheme === 'light' || newTheme === 'dark') {
+          setThemeState(newTheme)
+          applyTheme(newTheme)
+        }
+      }
+    }
+    
+    // Listen for system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleSystemThemeChange = () => {
+      const savedTheme = localStorage.getItem('theme') as Theme | null
+      // Only follow system preference if user hasn't set a preference
+      if (!savedTheme || (savedTheme !== 'light' && savedTheme !== 'dark')) {
+        const newTheme = mediaQuery.matches ? 'dark' : 'light'
+        setThemeState(newTheme)
+        applyTheme(newTheme)
+      }
+    }
+    
+    window.addEventListener('storage', handleStorageChange)
+    mediaQuery.addEventListener('change', handleSystemThemeChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      mediaQuery.removeEventListener('change', handleSystemThemeChange)
+    }
+  }, [])
 
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme)

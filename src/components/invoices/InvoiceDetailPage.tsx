@@ -27,6 +27,7 @@ export default function InvoiceDetailPage({
   const supabase = createClient()
   const [deleting, setDeleting] = useState(false)
 
+
   const totalPaid = payments.reduce((sum, payment) => sum + payment.amount, 0)
   const remaining = invoice.amount - totalPaid
 
