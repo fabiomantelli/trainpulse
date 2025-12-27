@@ -37,6 +37,7 @@ export default function AppointmentsContent({
   const [selectedDate, setSelectedDate] = useState<Date | null>(null)
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null)
   const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
     loadData()
@@ -133,8 +134,8 @@ export default function AppointmentsContent({
   }
 
   const handleAppointmentClick = (appointment: Appointment) => {
-    // Navigate to detail page
-    window.location.href = `/appointments/${appointment.id}`
+    // Navigate to detail page using Next.js router to preserve theme state
+    router.push(`/appointments/${appointment.id}`)
   }
 
   const handleCreateSuccess = () => {

@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { Database } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 type Appointment = Database['public']['Tables']['appointments']['Row']
 type AppointmentUpdate = Database['public']['Tables']['appointments']['Update']
@@ -37,6 +37,21 @@ export default function AppointmentDetailPage({
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const supabase = createClient()
+
+  // Ensure dark mode is preserved when navigating to this page
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme')
+      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const shouldBeDark = savedTheme === 'dark' || (!savedTheme && systemPrefersDark)
+      
+      if (shouldBeDark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    }
+  }, [])
 
   const scheduledDate = new Date(appointment.scheduled_at)
   const endTime = new Date(
