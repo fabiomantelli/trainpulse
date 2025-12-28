@@ -5,9 +5,8 @@ import { createClient } from '@/lib/supabase/client'
 import SubscriptionBanner from '@/components/subscription/SubscriptionBanner'
 import WelcomeBanner from '@/components/onboarding/WelcomeBanner'
 import FeatureHighlights from '@/components/growth/FeatureHighlights'
-import SocialProof from '@/components/growth/SocialProof'
-import Link from 'next/link'
 import { format, startOfDay, endOfDay, isToday } from 'date-fns'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Database } from '@/types/database.types'
 import RevenueCharts from './RevenueCharts'
@@ -250,12 +249,104 @@ export default function DashboardContent({
     )
   }
 
+  const getSubscriptionStatus = () => {
+    if (!profile) return null
+    
+    const isTrialing = profile.subscription_status === 'trialing'
+    const isActive = profile.subscription_status === 'active'
+    const isPastDue = profile.subscription_status === 'past_due'
+    const isCancelled = profile.subscription_status === 'cancelled'
+    const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null
+    const isTrialExpired = trialEndsAt ? trialEndsAt < new Date() : false
+    const hasHadSubscription = !!profile.stripe_subscription_id || isActive || isCancelled
+    
+    // Only show trial days if:
+    // 1. Status is trialing
+    // 2. Trial hasn't expired
+    // 3. User hasn't had a subscription before
+    const shouldShowTrial = isTrialing && !isTrialExpired && !hasHadSubscription
+    const daysRemaining = shouldShowTrial && trialEndsAt ? Math.max(0, Math.ceil((trialEndsAt.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))) : null
+    
+    return { isTrialing, isActive, isPastDue, isCancelled, daysRemaining, trialEndsAt, isTrialExpired, hasHadSubscription, shouldShowTrial }
+  }
+
+  const subscriptionStatus = getSubscriptionStatus()
+
   return (
     <>
       {profile && <SubscriptionBanner profile={profile} />}
       {profile && <WelcomeBanner profile={profile} />}
       {profile && <FeatureHighlights profile={profile} />}
-      <SocialProof />
+      
+      {/* Subscription Status Card */}
+      {profile && subscriptionStatus && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-2"
+        >
+          <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-sm dark:shadow-slate-900/50 border border-gray-200/50 dark:border-slate-700/30 p-4 hover:shadow-md transition-shadow">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2 mb-1">
+                    <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-slate-100">
+                      Subscription
+                    </h3>
+                    {subscriptionStatus.isActive && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                        Active
+                      </span>
+                    )}
+                    {subscriptionStatus.shouldShowTrial && subscriptionStatus.daysRemaining !== null && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+                        Trial - {subscriptionStatus.daysRemaining} days left
+                      </span>
+                    )}
+                    {subscriptionStatus.isTrialing && !subscriptionStatus.shouldShowTrial && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                        Trial Expired
+                      </span>
+                    )}
+                    {subscriptionStatus.isPastDue && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400">
+                        Payment Failed
+                      </span>
+                    )}
+                    {subscriptionStatus.isCancelled && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300">
+                        Cancelled
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-slate-400 break-words">
+                    {profile.is_early_adopter 
+                      ? 'Early Adopter - $19/month'
+                      : subscriptionStatus.shouldShowTrial && subscriptionStatus.daysRemaining !== null && subscriptionStatus.daysRemaining > 7
+                        ? 'Free trial active'
+                        : subscriptionStatus.isTrialing && !subscriptionStatus.shouldShowTrial
+                          ? 'Trial expired - Upgrade required'
+                          : '$29/month'}
+                  </p>
+                </div>
+              </div>
+              <Link
+                href="/subscription"
+                className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-sm font-medium rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-200 shadow-sm hover:shadow-md text-center sm:text-left"
+              >
+                {subscriptionStatus.isActive ? 'Manage' : subscriptionStatus.isTrialing ? 'Upgrade' : 'View Details'}
+              </Link>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

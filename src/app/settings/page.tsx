@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import ProfileSettingsForm from '@/components/profile/ProfileSettingsForm'
 
 export default async function SettingsPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -29,4 +29,6 @@ export default async function SettingsPage() {
     </div>
   )
 }
+
+
 

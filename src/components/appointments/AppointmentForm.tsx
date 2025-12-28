@@ -31,25 +31,14 @@ export default function AppointmentForm({
   const [selectedDate, setSelectedDate] = useState<Date>(
     appointment ? new Date(appointment.scheduled_at) : (initialDate || new Date())
   )
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:29',message:'selectedDate state changed',data:{selectedDateISO:selectedDate.toISOString(),selectedDateFormatted:format(selectedDate,'yyyy-MM-dd'),selectedDateLocal:selectedDate.toString(),timezoneOffset:selectedDate.getTimezoneOffset(),hours:selectedDate.getHours(),minutes:selectedDate.getMinutes(),hasInitialDate:!!initialDate,initialDateISO:initialDate?.toISOString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
-  }, [selectedDate, initialDate]);
-  // #endregion
   // Update selectedDate and selectedTime when initialDate changes (when modal opens with new date)
   useEffect(() => {
     if (initialDate && !appointment) {
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:40',message:'initialDate prop changed - updating selectedDate and selectedTime',data:{initialDateISO:initialDate.toISOString(),initialDateHours:initialDate.getHours(),initialDateMinutes:initialDate.getMinutes(),currentSelectedDateISO:selectedDate.toISOString(),currentSelectedTime:selectedTime},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       setSelectedDate(initialDate)
       // Extract time from initialDate and set selectedTime
       const hours = initialDate.getHours().toString().padStart(2, '0')
       const minutes = initialDate.getMinutes().toString().padStart(2, '0')
       const timeString = `${hours}:${minutes}`
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:47',message:'Setting selectedTime from initialDate',data:{timeString,initialDateISO:initialDate.toISOString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run4',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       setSelectedTime(timeString)
     }
   }, [initialDate, appointment])
@@ -78,9 +67,6 @@ export default function AppointmentForm({
           const newTime = `${nextHourAdjusted.toString().padStart(2, '0')}:${nextMinute.toString().padStart(2, '0')}`
           // Only adjust if we haven't already adjusted to this time
           if (timeAdjustmentRef.current !== newTime) {
-            // #region agent log
-            fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:56',message:'Adjusting selectedTime - was in past',data:{oldTime:selectedTime,newTime,selectedDateISO:selectedDate.toISOString(),nowISO:now.toISOString()},timestamp:Date.now(),sessionId:'debug-session',runId:'run3',hypothesisId:'D'})}).catch(()=>{});
-            // #endregion
             timeAdjustmentRef.current = newTime
             setSelectedTime(newTime)
           }
@@ -202,14 +188,24 @@ export default function AppointmentForm({
     }
 
     try {
+      let savedAppointmentId: string | null = null
+      let isCancellation = false
+      let isUpdate = false
+
       if (appointment) {
         // Editing - no recurring support for edits
-        const { error } = await (supabase
+        isUpdate = true
+        isCancellation = status === 'cancelled' && appointment.status !== 'cancelled'
+        
+        const { error, data } = await (supabase
           .from('appointments') as any)
           .update(appointmentData)
           .eq('id', appointment.id)
+          .select()
+          .single()
 
         if (error) throw error
+        savedAppointmentId = data?.id || appointment.id
         toast.success('Appointment updated successfully!')
       } else {
         // Creating - support recurring appointments
@@ -250,6 +246,26 @@ export default function AppointmentForm({
             .select()
 
           if (error) throw error
+          
+          // Send confirmation emails for all recurring appointments
+          if (data && Array.isArray(data)) {
+            for (const apt of data) {
+              try {
+                await fetch('/api/appointments/send-confirmation', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    appointmentId: apt.id,
+                    emailType: 'confirmation',
+                  }),
+                })
+              } catch (emailError) {
+                // Silently fail - don't block the flow
+                console.error('Failed to send confirmation email:', emailError)
+              }
+            }
+          }
+          
           toast.success(`Created ${appointmentsToCreate.length} recurring appointments successfully!`)
         } else {
           // Single appointment
@@ -257,9 +273,43 @@ export default function AppointmentForm({
             .from('appointments') as any)
             .insert(appointmentData)
             .select()
+            .single()
 
           if (error) throw error
+          savedAppointmentId = data?.id
           toast.success('Appointment created successfully!')
+        }
+      }
+
+      // Send confirmation email (non-blocking)
+      if (savedAppointmentId) {
+        try {
+          let emailType = 'confirmation'
+          if (isCancellation) {
+            emailType = 'cancellation'
+          } else if (isUpdate) {
+            emailType = 'update'
+          }
+
+          const response = await fetch('/api/appointments/send-confirmation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              appointmentId: savedAppointmentId,
+              emailType,
+              ...(isCancellation && notes ? { cancellationReason: notes } : {}),
+            }),
+          })
+
+          if (response.ok) {
+            const result = await response.json()
+            if (result.success) {
+              toast.success('Confirmation email sent to client!', { duration: 3000 })
+            }
+          }
+        } catch (emailError) {
+          // Silently fail - don't block the flow
+          console.error('Failed to send confirmation email:', emailError)
         }
       }
 
@@ -369,20 +419,11 @@ export default function AppointmentForm({
           type="date"
           value={format(selectedDate, 'yyyy-MM-dd')}
           onChange={(e) => {
-            // #region agent log
-            fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:316',message:'Date onChange - input value received',data:{inputValue:e.target.value,currentSelectedDate:selectedDate.toISOString(),currentFormatted:format(selectedDate,'yyyy-MM-dd'),timezoneOffset:selectedDate.getTimezoneOffset()},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             // Fix: Parse date string as local date to avoid timezone issues
             // e.target.value is in format 'yyyy-MM-dd', parse it as local date
             const [year, month, day] = e.target.value.split('-').map(Number)
             const newDate = new Date(year, month - 1, day)
-            // #region agent log
-            fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:321',message:'Date onChange - Date object created (FIXED)',data:{newDateISO:newDate.toISOString(),newDateLocal:newDate.toString(),newDateFormatted:format(newDate,'yyyy-MM-dd'),timezoneOffset:newDate.getTimezoneOffset(),isValid:!isNaN(newDate.getTime()),hours:newDate.getHours(),minutes:newDate.getMinutes(),year,month,day},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'A'})}).catch(()=>{});
-            // #endregion
             if (!isNaN(newDate.getTime())) {
-              // #region agent log
-              fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentForm.tsx:323',message:'Date onChange - setting state',data:{oldDateISO:selectedDate.toISOString(),newDateISO:newDate.toISOString(),datesEqual:selectedDate.getTime()===newDate.getTime()},timestamp:Date.now(),sessionId:'debug-session',runId:'post-fix',hypothesisId:'B'})}).catch(()=>{});
-              // #endregion
               setSelectedDate(newDate)
             }
           }}

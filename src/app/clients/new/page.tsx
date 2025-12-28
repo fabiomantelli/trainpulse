@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import NewClientForm from '@/components/clients/NewClientForm'
 
 export default async function NewClientPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

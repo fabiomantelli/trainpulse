@@ -60,3 +60,7 @@ $$;
 -- This function can be called daily to check for birthdays
 COMMENT ON FUNCTION public.check_client_birthdays() IS 'Checks for client birthdays on the current date and creates notifications';
 
+
+
+
+

@@ -1,9 +1,10 @@
 import { createServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { Suspense } from 'react'
 import SubscriptionPageContent from '@/components/subscription/SubscriptionPageContent'
 
 export default async function SubscriptionPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -23,6 +24,12 @@ export default async function SubscriptionPage() {
     redirect('/dashboard')
   }
 
-  return <SubscriptionPageContent profile={profile} />
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SubscriptionPageContent profile={profile} />
+    </Suspense>
+  )
 }
+
+
 

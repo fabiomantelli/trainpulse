@@ -69,3 +69,7 @@ sizes.forEach((size) => {
 
 console.log('\nAll icons generated successfully!')
 
+
+
+
+

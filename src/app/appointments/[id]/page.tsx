@@ -12,7 +12,7 @@ export default async function AppointmentDetail({
 }: {
   params: { id: string }
 }) {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

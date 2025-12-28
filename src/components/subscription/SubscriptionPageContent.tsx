@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Database } from '@/types/database.types'
 import SubscriptionStatus from './SubscriptionStatus'
 import BackButton from '@/components/layout/BackButton'
@@ -18,9 +18,12 @@ export default function SubscriptionPageContent({
   profile,
 }: SubscriptionPageContentProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [earlyAdopterCount, setEarlyAdopterCount] = useState<number | null>(null)
   const supabase = createClient()
+
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     async function fetchEarlyAdopterCount() {
@@ -30,7 +33,74 @@ export default function SubscriptionPageContent({
       }
     }
     fetchEarlyAdopterCount()
-  }, [])
+
+    // Refresh data when page gains focus (user might have returned from Stripe portal)
+    const handleFocus = () => {
+      router.refresh()
+    }
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+    }
+  }, [router, supabase])
+
+  const handleSyncSubscription = async () => {
+    if (!profile.stripe_subscription_id) return
+
+    setSyncing(true)
+    try {
+      const response = await fetch('/api/stripe/subscription/sync', {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to sync subscription')
+      }
+
+      toast.success('Subscription status updated')
+      router.refresh()
+    } catch (error: any) {
+      console.error('Error syncing subscription:', error)
+      toast.error(error.message || 'Failed to sync subscription')
+    } finally {
+      setSyncing(false)
+    }
+  }
+
+  // Handle return from Stripe checkout
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const sessionId = searchParams.get('session_id')
+
+    if (success === 'true' && sessionId) {
+      // Show success message
+      toast.success('Payment successful! Your subscription is now active.', {
+        duration: 5000,
+      })
+
+      // Refresh profile data to get updated subscription status
+      router.refresh()
+
+      // Clean up URL parameters
+      const url = new URL(window.location.href)
+      url.searchParams.delete('success')
+      url.searchParams.delete('session_id')
+      window.history.replaceState({}, '', url.toString())
+    } else if (success === 'false') {
+      // Handle cancellation
+      toast.error('Payment was cancelled. Please try again when ready.', {
+        duration: 5000,
+      })
+
+      // Clean up URL parameters
+      const url = new URL(window.location.href)
+      url.searchParams.delete('success')
+      window.history.replaceState({}, '', url.toString())
+    }
+  }, [searchParams, router])
 
   const handleUpgrade = async () => {
     setLoading(true)
@@ -49,11 +119,15 @@ export default function SubscriptionPageContent({
       }
 
       if (data.url) {
+        // Redirect to Stripe - loading will be reset when page unloads
         window.location.href = data.url
+        // Don't set loading to false here as we're redirecting
+        return
       }
     } catch (error: any) {
       console.error('Error creating checkout:', error)
       toast.error(error.message || 'Failed to start checkout')
+    } finally {
       setLoading(false)
     }
   }
@@ -75,7 +149,10 @@ export default function SubscriptionPageContent({
       }
 
       if (data.url) {
+        // Redirect to Stripe Customer Portal in the same tab
         window.location.href = data.url
+        // Don't set loading to false here as we're redirecting
+        return
       }
     } catch (error: any) {
       console.error('Error opening portal:', error)
@@ -86,6 +163,8 @@ export default function SubscriptionPageContent({
 
   const isTrialing = profile.subscription_status === 'trialing'
   const isActive = profile.subscription_status === 'active'
+  const isCancelled = profile.subscription_status === 'cancelled'
+  const isPastDue = profile.subscription_status === 'past_due'
   const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null
   const isTrialExpired = trialEndsAt && trialEndsAt < new Date()
 
@@ -162,6 +241,60 @@ export default function SubscriptionPageContent({
 
           <SubscriptionStatus profile={profile} />
 
+          {/* Sync button for manual refresh */}
+          {profile.stripe_subscription_id && (
+            <div className="mt-4 flex justify-end">
+              <button
+                onClick={handleSyncSubscription}
+                disabled={syncing}
+                className="text-sm text-gray-600 dark:text-slate-400 hover:text-gray-900 dark:hover:text-slate-200 disabled:opacity-50 flex items-center gap-2"
+              >
+                {syncing ? (
+                  <>
+                    <svg
+                      className="animate-spin h-4 w-4"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Syncing...
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="h-4 w-4"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    Refresh Status
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
           <div className="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-4">
               Plan Details
@@ -229,7 +362,7 @@ export default function SubscriptionPageContent({
                       clipRule="evenodd"
                     />
                   </svg>
-                  Stripe Connect integration
+                  Email confirmations for appointments
                 </li>
                 <li className="flex items-center">
                   <svg
@@ -243,7 +376,7 @@ export default function SubscriptionPageContent({
                       clipRule="evenodd"
                     />
                   </svg>
-                  Automatic tax calculation
+                  Invoice management
                 </li>
                 <li className="flex items-center">
                   <svg
@@ -265,6 +398,7 @@ export default function SubscriptionPageContent({
 
           <div className="mt-8 pt-8 border-t border-gray-200 dark:border-slate-700">
             <div className="flex flex-col sm:flex-row gap-4">
+              {/* Show upgrade button for trialing users (expired or not active) */}
               {isTrialing && (isTrialExpired || !isActive) && (
                 <button
                   onClick={handleUpgrade}
@@ -281,6 +415,24 @@ export default function SubscriptionPageContent({
                 </button>
               )}
 
+              {/* Show upgrade button for cancelled subscriptions */}
+              {isCancelled && (
+                <button
+                  onClick={handleUpgrade}
+                  disabled={loading}
+                  className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading
+                    ? 'Loading...'
+                    : profile.is_early_adopter
+                      ? 'Reactivate Subscription - $19/month'
+                      : earlyAdopterCount !== null && earlyAdopterCount < 100
+                        ? `Reactivate - $19/month (Early Adopter)`
+                        : 'Reactivate Subscription - $29/month'}
+                </button>
+              )}
+
+              {/* Show manage button for active subscriptions */}
               {isActive && (
                 <button
                   onClick={handleManageSubscription}
@@ -291,7 +443,8 @@ export default function SubscriptionPageContent({
                 </button>
               )}
 
-              {profile.subscription_status === 'past_due' && (
+              {/* Show update payment button for past due */}
+              {isPastDue && (
                 <button
                   onClick={handleManageSubscription}
                   disabled={loading}
@@ -303,8 +456,11 @@ export default function SubscriptionPageContent({
             </div>
 
             <p className="mt-4 text-xs text-gray-500 dark:text-slate-400">
-              You can cancel your subscription at any time. Cancellation takes effect at the end of
-              your current billing period.
+              {isActive
+                ? 'You can cancel your subscription at any time. Cancellation takes effect at the end of your current billing period.'
+                : isCancelled
+                  ? 'Your subscription has been cancelled. Reactivate anytime to continue using TrainPulse.'
+                  : 'Upgrade to unlock all features and continue using TrainPulse.'}
             </p>
           </div>
         </div>

@@ -102,7 +102,7 @@ export default function NewWorkoutForm({ trainerId }: { trainerId: string }) {
         </div>
 
           <div className="bg-white dark:bg-slate-800/90 rounded-xl shadow-xl dark:shadow-slate-900/50 border border-gray-200 dark:border-slate-700/30 p-5 md:p-6">
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} noValidate className="space-y-4">
               {error && (
                 <div className="rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 p-4">
                   <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
@@ -111,10 +111,11 @@ export default function NewWorkoutForm({ trainerId }: { trainerId: string }) {
 
               {/* Workout Name */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
+                <label htmlFor="workout-name" className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                   Workout Name *
                 </label>
                 <input
+                  id="workout-name"
                   type="text"
                   required
                   value={name}
@@ -257,18 +258,19 @@ export default function NewWorkoutForm({ trainerId }: { trainerId: string }) {
 
                           {/* Exercise Name - Full Width */}
                           <div className="mb-4">
-                            <label className="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-slate-300 mb-2">
+                            <label htmlFor={`exercise-name-${index}`} className="flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-slate-300 mb-2">
                               <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                               </svg>
                               Exercise Name *
                             </label>
                             <input
+                              id={`exercise-name-${index}`}
                               type="text"
                               required
                               value={exercise.name}
                               onChange={(e) => updateExercise(index, 'name', e.target.value)}
-                              placeholder="e.g., Bench Press, Squat, Running..."
+                              placeholder="Exercise Name"
                               className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-500 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm transition-all"
                             />
                           </div>

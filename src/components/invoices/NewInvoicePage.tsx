@@ -51,62 +51,14 @@ export default function NewInvoicePage({ trainerId, clients, trainerProfile }: N
         throw new Error('Client not found')
       }
 
-      let stripeInvoiceId: string | null = null
-
-      // If trainer has Stripe account connected, create invoice in Stripe
-      if (trainerProfile?.stripe_account_id) {
-        try {
-          const response = await fetch('/api/stripe/invoices/create', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              trainerId,
-              clientId: selectedClientId,
-              amount: parseFloat(amount),
-              description: `Invoice for ${selectedClient.name}`,
-              dueDate: dueDate || null,
-            }),
-          })
-
-          const data = await response.json()
-
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to create Stripe invoice')
-          }
-
-          stripeInvoiceId = data.stripeInvoiceId
-
-          // If status is sent, send the invoice via Stripe
-          if (status === 'sent' && stripeInvoiceId) {
-            await fetch('/api/stripe/invoices/send', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                invoiceId: stripeInvoiceId,
-                trainerId,
-              }),
-            })
-          }
-        } catch (stripeError: any) {
-          console.error('Stripe invoice creation error:', stripeError)
-          // Continue with local invoice creation even if Stripe fails
-          toast('Invoice created locally, but Stripe integration failed. Please check your Stripe connection.', {
-            icon: '⚠️',
-          })
-        }
-      }
-
+      // MVP: Create invoice locally only (no Stripe Connect integration)
+      // Trainers can mark invoices as paid manually after receiving payment externally
       const invoiceData: any = {
         trainer_id: trainerId,
         client_id: selectedClientId,
         amount: parseFloat(amount),
         status,
         due_date: dueDate || null,
-        stripe_invoice_id: stripeInvoiceId,
       }
 
       // If creating with paid status, set paid_at
@@ -151,6 +103,7 @@ export default function NewInvoicePage({ trainerId, clients, trainerProfile }: N
     } catch (err: any) {
       setError(err.message || 'Failed to create invoice')
       toast.error('Failed to create invoice')
+    } finally {
       setLoading(false)
     }
   }

@@ -162,3 +162,5 @@ Edite `src/components/pwa/PWAProvider.tsx`:
 - [Web.dev - PWA](https://web.dev/progressive-web-apps/)
 - [Next.js - PWA](https://nextjs.org/docs/app/building-your-application/configuring/progressive-web-apps)
 
+
+

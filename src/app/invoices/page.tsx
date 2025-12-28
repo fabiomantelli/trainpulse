@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import InvoicesContent from '@/components/invoices/InvoicesContent'
 
 export default async function InvoicesPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

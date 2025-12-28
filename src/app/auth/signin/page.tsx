@@ -15,17 +15,9 @@ function SignInContent() {
   const supabase = createClient()
 
   useEffect(() => {
-    // #region agent log
-    const allParams = Object.fromEntries(new URLSearchParams(window.location.search).entries())
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signin/page.tsx:17',message:'SignIn page loaded',data:{currentUrl:window.location.href,pathname:window.location.pathname,search:window.location.search,hash:window.location.hash,allParams,paramCount:Object.keys(allParams).length,referrer:document.referrer,hasError:!!searchParams.get('error'),errorValue:searchParams.get('error')},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-    // #endregion
-
     // Check if user is already authenticated
     const checkUser = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signin/page.tsx:22',message:'Session check result',data:{hasSession:!!session,userId:session?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-      // #endregion
       if (session) {
         router.push('/dashboard')
         router.refresh()
@@ -36,9 +28,6 @@ function SignInContent() {
     // Check for error in URL params
     const errorParam = searchParams.get('error')
     if (errorParam) {
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signin/page.tsx:32',message:'Error param found in URL',data:{errorParam,decodedError:decodeURIComponent(errorParam)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       setError(decodeURIComponent(errorParam))
     }
   }, [searchParams, supabase, router])

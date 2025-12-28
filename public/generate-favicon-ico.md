@@ -23,3 +23,7 @@ Até gerar o `.ico`, você pode usar o `favicon.png` que já está disponível. 
 
 **Nota:** Navegadores modernos já suportam `favicon.svg`, então o `.ico` é principalmente para compatibilidade com navegadores antigos (IE, navegadores muito antigos do Chrome/Firefox).
 
+
+
+
+

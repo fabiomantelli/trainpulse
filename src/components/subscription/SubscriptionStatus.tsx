@@ -115,9 +115,21 @@ export default function SubscriptionStatus({ profile }: SubscriptionStatusProps)
 
       {isActive && (
         <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
-          <p className="text-sm text-green-800 dark:text-green-200">
-            Your subscription is active. You're all set!
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-green-800 dark:text-green-200">
+              Your subscription is active. You're all set!
+            </p>
+            {profile.subscription_current_period_end && (
+              <p className="text-sm text-green-700 dark:text-green-300">
+                Next billing date: {format(new Date(profile.subscription_current_period_end), 'MMMM d, yyyy')}
+              </p>
+            )}
+            {profile.subscription_cancel_at && (
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                ⚠️ Your subscription will be cancelled on {format(new Date(profile.subscription_cancel_at), 'MMMM d, yyyy')}. You'll have access until then.
+              </p>
+            )}
+          </div>
         </div>
       )}
 
@@ -131,13 +143,26 @@ export default function SubscriptionStatus({ profile }: SubscriptionStatusProps)
 
       {isCancelled && (
         <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-          <p className="text-sm text-gray-800 dark:text-gray-200">
-            Your subscription has been cancelled. You'll continue to have access until the end of your
-            current billing period.
-          </p>
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
+              Your subscription has been cancelled.
+            </p>
+            {profile.subscription_cancel_at && (
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                You'll have access until {format(new Date(profile.subscription_cancel_at), 'MMMM d, yyyy')}. After that, you can reactivate anytime to continue using all TrainPulse features.
+              </p>
+            )}
+            {!profile.subscription_cancel_at && (
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                You can reactivate it anytime to continue using all TrainPulse features.
+              </p>
+            )}
+          </div>
         </div>
       )}
     </div>
   )
 }
+
+
 

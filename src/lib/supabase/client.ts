@@ -10,6 +10,9 @@ export const createClient = () => {
     {
       cookies: {
         getAll() {
+          if (typeof document === 'undefined') {
+            return []
+          }
           return document.cookie.split('; ').map(cookie => {
             const [name, ...rest] = cookie.split('=')
             return { name, value: decodeURIComponent(rest.join('=')) }

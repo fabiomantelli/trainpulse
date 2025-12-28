@@ -5,6 +5,7 @@ import { Database } from '@/types/database.types'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { differenceInDays } from 'date-fns'
+import { motion, AnimatePresence } from 'framer-motion'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -25,13 +26,35 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
   const [earlyAdopterCount, setEarlyAdopterCount] = useState<number | null>(null)
   const [clientsCount, setClientsCount] = useState(0)
   const [workoutsCount, setWorkoutsCount] = useState(0)
+  const [isDismissed, setIsDismissed] = useState(false)
 
   const createdDate = profile.created_at ? new Date(profile.created_at) : new Date()
   const daysSinceSignup = differenceInDays(new Date(), createdDate)
   const isNewUser = daysSinceSignup < 7
+  
+  // Check if trial has expired
+  const trialEndsAt = profile.trial_ends_at ? new Date(profile.trial_ends_at) : null
+  const isTrialExpired = trialEndsAt ? trialEndsAt < new Date() : false
+  
+  // Check if user has ever had an active subscription (even if cancelled now)
+  const hasHadSubscription = !!profile.stripe_subscription_id || profile.subscription_status === 'active' || profile.subscription_status === 'cancelled'
+  
+  // Don't show banner if subscription is active, trial expired, or user has had subscription before
+  const shouldShowBanner = isNewUser && !isDismissed && profile.subscription_status !== 'active' && !isTrialExpired && !hasHadSubscription
+
+  // Check localStorage on mount to see if banner was already dismissed
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storageKey = `welcome_banner_dismissed_${profile.id}`
+      const dismissed = localStorage.getItem(storageKey) === 'true'
+      if (dismissed) {
+        setIsDismissed(true)
+      }
+    }
+  }, [profile.id])
 
   useEffect(() => {
-    if (!isNewUser) return
+    if (!shouldShowBanner) return
 
     async function loadData() {
       // Load early adopter count
@@ -52,25 +75,19 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
         .eq('trainer_id', profile.id)
       setWorkoutsCount(workouts || 0)
 
-      // Build onboarding steps
+      // Build onboarding steps (MVP: Stripe Connect removed)
       const onboardingSteps: OnboardingStep[] = [
-        {
-          id: 'stripe',
-          label: 'Connect Stripe account',
-          completed: !!profile.stripe_account_id,
-          link: '/settings',
-        },
-        {
-          id: 'location',
-          label: 'Set your location (for tax calculation)',
-          completed: !!(profile.state && profile.city && profile.zip_code),
-          link: '/settings',
-        },
         {
           id: 'client',
           label: 'Add your first client',
           completed: (clients || 0) > 0,
           link: '/clients/new',
+        },
+        {
+          id: 'appointment',
+          label: 'Schedule your first appointment',
+          completed: false, // We'll check this if needed
+          link: '/appointments/new',
         },
         {
           id: 'workout',
@@ -86,7 +103,16 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
     loadData()
   }, [profile, isNewUser, supabase])
 
-  if (!isNewUser) {
+  const handleDismiss = () => {
+    setIsDismissed(true)
+    if (typeof window !== 'undefined') {
+      const storageKey = `welcome_banner_dismissed_${profile.id}`
+      localStorage.setItem(storageKey, 'true')
+    }
+  }
+
+  // Don't show banner if conditions are not met
+  if (!shouldShowBanner) {
     return null
   }
 
@@ -95,7 +121,15 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
   const progress = totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0
 
   return (
-    <div className="mb-6 bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 shadow-sm">
+    <AnimatePresence>
+      {!isDismissed && (
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20, height: 0 }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
+          className="mb-6 bg-gradient-to-r from-blue-50 via-purple-50 to-blue-50 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 shadow-sm overflow-hidden"
+        >
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
@@ -114,12 +148,9 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
           </p>
         </div>
         <button
-          onClick={() => {
-            // Store dismissal in localStorage
-            localStorage.setItem('welcome_banner_dismissed', 'true')
-            window.location.reload()
-          }}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+          onClick={handleDismiss}
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          aria-label="Dismiss welcome banner"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -221,7 +252,11 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
           </Link>
         </div>
       )}
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
+
+
 

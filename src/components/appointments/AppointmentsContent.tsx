@@ -127,9 +127,6 @@ export default function AppointmentsContent({
   }, [appointments, filter, searchQuery])
 
   const handleDateClick = (date: Date) => {
-    // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AppointmentsContent.tsx:128',message:'handleDateClick - date clicked from calendar',data:{dateISO:date.toISOString(),dateFormatted:format(date,'yyyy-MM-dd'),dateLocal:date.toString(),timezoneOffset:date.getTimezoneOffset()},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     setSelectedDate(date)
     setShowCreateModal(true)
   }

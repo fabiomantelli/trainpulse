@@ -29,16 +29,17 @@ export const metadata: Metadata = {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { code?: string | string[]; [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ code?: string | string[]; [key: string]: string | string[] | undefined }>
 }) {
-  const code = Array.isArray(searchParams?.code) ? searchParams.code[0] : searchParams?.code
+  const resolvedSearchParams = await searchParams
+  const code = Array.isArray(resolvedSearchParams?.code) ? resolvedSearchParams.code[0] : resolvedSearchParams?.code
 
   // If code parameter is present, redirect to /auth/callback to handle authentication
   if (code && typeof code === 'string') {
     redirect(`/auth/callback?code=${encodeURIComponent(code)}`)
   }
 
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

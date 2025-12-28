@@ -38,10 +38,6 @@ export default function SignUpPage() {
     setLoading(true)
     setError(null)
 
-    // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:29',message:'handleSignUp called',data:{email,hasFullName:!!fullName},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
-
     try {
       // Get the current origin - prioritize NEXT_PUBLIC_APP_URL, then window.location, then fallback
       let currentOrigin = 'http://localhost:3000'
@@ -56,10 +52,6 @@ export default function SignUpPage() {
       // Remove trailing slash if present
       currentOrigin = currentOrigin.replace(/\/$/, '')
       const emailRedirectTo = `${currentOrigin}/auth/callback`
-      
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:42',message:'SignUp with emailRedirectTo',data:{currentOrigin,emailRedirectTo,envAppUrl:process.env.NEXT_PUBLIC_APP_URL,windowOrigin:typeof window !== 'undefined' ? window.location.origin : 'N/A',isBrowser:typeof window !== 'undefined'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       
       console.log('🔗 Email Redirect URL:', { currentOrigin, emailRedirectTo, envAppUrl: process.env.NEXT_PUBLIC_APP_URL })
 
@@ -86,10 +78,6 @@ export default function SignUpPage() {
           .eq('id', data.user.id)
       }
 
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:43',message:'signUp response',data:{hasError:!!error,errorMessage:error?.message,hasData:!!data,hasUser:!!data?.user,hasSession:!!data?.session,userId:data?.user?.id},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-
       // Log detailed signup response for debugging email sending
       console.log('🔍 SignUp Response:', {
         hasUser: !!data?.user,
@@ -101,9 +89,6 @@ export default function SignUpPage() {
       })
 
       if (error) {
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:46',message:'signUp error',data:{errorMessage:error.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         setError(error.message)
         setLoading(false)
         return
@@ -111,9 +96,6 @@ export default function SignUpPage() {
 
       // Check if session is in the signUp response
       if (data?.session) {
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:53',message:'Session found in signUp response',data:{hasSession:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
         await new Promise(resolve => setTimeout(resolve, 300))
         router.refresh()
         router.push('/dashboard')
@@ -122,10 +104,6 @@ export default function SignUpPage() {
 
       // If no session but user was created, email verification is required
       if (data?.user && !data?.session) {
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:58',message:'Email verification required',data:{hasUser:true,hasSession:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'C'})}).catch(()=>{});
-        // #endregion
-        
         // Log email verification status
         const emailConfirmed = !!data.user.email_confirmed_at
         console.log('📧 Email Verification Status:', {
@@ -144,18 +122,10 @@ export default function SignUpPage() {
       }
 
       // If no session in signUp response, try to sign in (fallback for cases where email confirmation is disabled)
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:64',message:'No session in signUp, calling signInWithPassword',data:{hasUser:!!data?.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
-
       const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
-
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:70',message:'signInWithPassword response',data:{hasError:!!signInError,errorMessage:signInError?.message,hasSession:!!signInData?.session,hasUser:!!signInData?.user},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
 
       if (signInError) {
         // Check if error is due to email not confirmed
@@ -166,33 +136,21 @@ export default function SignUpPage() {
           setLoading(false)
           return
         }
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:80',message:'signInWithPassword error',data:{errorMessage:signInError.message},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         setError(signInError.message || 'Account created but could not sign in. Please try signing in manually.')
         setLoading(false)
         return
       }
 
       if (signInData?.session) {
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:88',message:'Session established via signIn, redirecting',data:{hasSession:true},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         // Wait a moment for the profile trigger to complete
         await new Promise(resolve => setTimeout(resolve, 300))
         router.refresh()
         router.push('/dashboard')
       } else {
-        // #region agent log
-        fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:94',message:'No session after signInWithPassword',data:{hasSignInData:!!signInData},timestamp:Date.now(),sessionId:'debug-session',runId:'run2',hypothesisId:'A'})}).catch(()=>{});
-        // #endregion
         setError('Account created but session could not be established. Please try signing in.')
         setLoading(false)
       }
     } catch (err) {
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:85',message:'handleSignUp exception',data:{errorMessage:err instanceof Error ? err.message : String(err)},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-      // #endregion
       console.error('Sign up error:', err)
       setError('An unexpected error occurred. Please try again.')
       setLoading(false)
@@ -218,10 +176,6 @@ export default function SignUpPage() {
       const emailRedirectTo = `${currentOrigin}/auth/callback`
       
       console.log('📧 Resending verification email to:', email)
-      // #region agent log
-      fetch('http://127.0.0.1:7245/ingest/94342fbf-de17-47b0-b324-c297d1d87e29',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'auth/signup/page.tsx:155',message:'Resend email with redirectTo',data:{email,emailRedirectTo,currentOrigin,envAppUrl:process.env.NEXT_PUBLIC_APP_URL,windowOrigin:typeof window !== 'undefined' ? window.location.origin : 'N/A'},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-      
       console.log('🔗 Email Redirect URL (resend):', { currentOrigin, emailRedirectTo, envAppUrl: process.env.NEXT_PUBLIC_APP_URL })
       
       const { data, error: resendError } = await supabase.auth.resend({

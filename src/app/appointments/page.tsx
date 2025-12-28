@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import AppointmentsContent from '@/components/appointments/AppointmentsContent'
 
 export default async function AppointmentsPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const {
     data: { user },
   } = await supabase.auth.getUser()

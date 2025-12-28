@@ -25,6 +25,8 @@ export interface Database {
           stripe_account_id: string | null
           stripe_subscription_id: string | null
           trial_ends_at: string | null
+          subscription_current_period_end: string | null
+          subscription_cancel_at: string | null
           is_early_adopter: boolean
           state: string | null
           city: string | null
@@ -44,6 +46,8 @@ export interface Database {
           stripe_account_id?: string | null
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
+          subscription_current_period_end?: string | null
+          subscription_cancel_at?: string | null
           is_early_adopter?: boolean
           state?: string | null
           city?: string | null
@@ -63,6 +67,8 @@ export interface Database {
           stripe_account_id?: string | null
           stripe_subscription_id?: string | null
           trial_ends_at?: string | null
+          subscription_current_period_end?: string | null
+          subscription_cancel_at?: string | null
           is_early_adopter?: boolean
           state?: string | null
           city?: string | null
