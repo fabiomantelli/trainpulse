@@ -127,7 +127,7 @@ export default function FeatureHighlights({ profile }: FeatureHighlightsProps) {
   }
 
   return (
-    <div className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-6 shadow-sm">
+    <div className="mb-6 bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4 sm:p-6 shadow-sm">
       <div className="flex items-start justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-slate-100 mb-1">
@@ -178,7 +178,7 @@ export default function FeatureHighlights({ profile }: FeatureHighlightsProps) {
         </div>
         <Link
           href="/subscription"
-          className="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl whitespace-nowrap"
+          className="w-full sm:w-auto px-3 py-3 sm:px-6 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm sm:text-base font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center whitespace-normal sm:whitespace-nowrap break-words leading-tight"
         >
           Upgrade - {getPricingMessage()}
         </Link>
