@@ -8,8 +8,9 @@ type Invoice = Database['public']['Tables']['invoices']['Row']
 export default async function InvoiceDetail({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -23,7 +24,7 @@ export default async function InvoiceDetail({
   const { data: invoice, error: invoiceError } = await supabase
     .from('invoices')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('trainer_id', user.id)
     .single()
 
@@ -49,7 +50,7 @@ export default async function InvoiceDetail({
   const { data: payments } = await supabase
     .from('payments')
     .select('*')
-    .eq('invoice_id', params.id)
+    .eq('invoice_id', id)
     .order('created_at', { ascending: false })
 
   return (

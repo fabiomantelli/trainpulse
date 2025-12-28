@@ -5,8 +5,9 @@ import EditClientPage from '@/components/clients/EditClientPage'
 export default async function EditClient({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -20,7 +21,7 @@ export default async function EditClient({
   const { data: client, error: clientError } = await supabase
     .from('clients')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('trainer_id', user.id)
     .single()
 

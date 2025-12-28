@@ -7,8 +7,9 @@ export const dynamic = 'force-dynamic'
 export default async function EditAppointment({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -22,7 +23,7 @@ export default async function EditAppointment({
   const { data: appointment, error } = await supabase
     .from('appointments')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('trainer_id', user.id)
     .single()
 

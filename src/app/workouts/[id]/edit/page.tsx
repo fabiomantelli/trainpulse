@@ -5,8 +5,9 @@ import EditWorkoutForm from '@/components/workouts/EditWorkoutForm'
 export default async function EditWorkoutPage({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -20,7 +21,7 @@ export default async function EditWorkoutPage({
   const { data: workout, error } = await supabase
     .from('workouts')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('trainer_id', user.id)
     .single()
 

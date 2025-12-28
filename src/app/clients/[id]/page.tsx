@@ -5,8 +5,9 @@ import ClientDetailPage from '@/components/clients/ClientDetailPage'
 export default async function ClientDetail({
   params,
 }: {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }) {
+  const { id } = await params
   const supabase = await createServerClient()
   const {
     data: { user },
@@ -20,7 +21,7 @@ export default async function ClientDetail({
   const { data: client, error: clientError } = await supabase
     .from('clients')
     .select('*')
-    .eq('id', params.id)
+    .eq('id', id)
     .eq('trainer_id', user.id)
     .single()
 
@@ -32,7 +33,7 @@ export default async function ClientDetail({
   const { data: appointments } = await supabase
     .from('appointments')
     .select('*')
-    .eq('client_id', params.id)
+    .eq('client_id', id)
     .order('scheduled_at', { ascending: false })
     .limit(10)
 
@@ -40,7 +41,7 @@ export default async function ClientDetail({
   const { data: invoices } = await supabase
     .from('invoices')
     .select('*')
-    .eq('client_id', params.id)
+    .eq('client_id', id)
     .order('created_at', { ascending: false })
     .limit(10)
 
@@ -55,7 +56,7 @@ export default async function ClientDetail({
         description
       )
     `)
-    .eq('client_id', params.id)
+    .eq('client_id', id)
     .order('completed_at', { ascending: false })
     .limit(5)
 
