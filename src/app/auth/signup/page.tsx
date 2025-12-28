@@ -165,13 +165,13 @@ export default function SignUpPage() {
     setResendingEmail(true)
     setError(null)
     try {
-      // Get the current origin - prioritize NEXT_PUBLIC_APP_URL, then window.location, then fallback
-      let currentOrigin = 'http://localhost:3000'
+      // Get the current origin - prioritize window.location in browser to ensure PKCE works
+      // If we use NEXT_PUBLIC_APP_URL in browser and it differs from the actual URL,
+      // we'll get a "PKCE code verifier not found" error because the verifier is stored on the current domain
+      let currentOrigin = ''
       if (typeof window !== 'undefined') {
-        // In browser: use NEXT_PUBLIC_APP_URL if set, otherwise use window.location.origin
-        currentOrigin = process.env.NEXT_PUBLIC_APP_URL || window.location.origin
+        currentOrigin = window.location.origin
       } else {
-        // Server-side: use NEXT_PUBLIC_APP_URL
         currentOrigin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
       }
       
@@ -631,4 +631,3 @@ export default function SignUpPage() {
     </div>
   )
 }
-
