@@ -55,6 +55,9 @@ export default function SignUpPage() {
       
       console.log('🔗 Email Redirect URL:', { currentOrigin, emailRedirectTo, envAppUrl: process.env.NEXT_PUBLIC_APP_URL })
 
+      // Get user's timezone
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -62,6 +65,7 @@ export default function SignUpPage() {
           emailRedirectTo,
           data: {
             full_name: fullName,
+            timezone,
           },
         },
       })
