@@ -26,6 +26,7 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
   const [earlyAdopterCount, setEarlyAdopterCount] = useState<number | null>(null)
   const [clientsCount, setClientsCount] = useState(0)
   const [workoutsCount, setWorkoutsCount] = useState(0)
+  const [appointmentsCount, setAppointmentsCount] = useState(0)
   const [isDismissed, setIsDismissed] = useState(false)
 
   const createdDate = profile.created_at ? new Date(profile.created_at) : new Date()
@@ -75,6 +76,13 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
         .eq('trainer_id', profile.id)
       setWorkoutsCount(workouts || 0)
 
+      // Load appointments count
+      const { count: appointments } = await supabase
+        .from('appointments')
+        .select('*', { count: 'exact', head: true })
+        .eq('trainer_id', profile.id)
+      setAppointmentsCount(appointments || 0)
+
       // Build onboarding steps (MVP: Stripe Connect removed)
       const onboardingSteps: OnboardingStep[] = [
         {
@@ -86,7 +94,7 @@ export default function WelcomeBanner({ profile }: WelcomeBannerProps) {
         {
           id: 'appointment',
           label: 'Schedule your first appointment',
-          completed: false, // We'll check this if needed
+          completed: (appointments || 0) > 0,
           link: '/appointments/new',
         },
         {

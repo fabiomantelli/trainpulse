@@ -178,7 +178,7 @@ export default function FeatureHighlights({ profile }: FeatureHighlightsProps) {
         </div>
         <Link
           href="/subscription"
-          className="w-full sm:w-auto px-3 py-3 sm:px-6 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-sm sm:text-base font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center whitespace-normal sm:whitespace-nowrap break-words leading-tight"
+          className="w-full sm:w-auto px-2 py-3 sm:px-6 sm:py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white text-xs sm:text-base font-medium rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl text-center whitespace-normal sm:whitespace-nowrap break-words leading-tight"
         >
           Upgrade - {getPricingMessage()}
         </Link>
