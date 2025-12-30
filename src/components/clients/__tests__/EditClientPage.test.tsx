@@ -1,21 +1,22 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import '@testing-library/jest-dom'
 import userEvent from '@testing-library/user-event'
 import EditClientPage from '../EditClientPage'
 import { createClient } from '@/lib/supabase/client'
 
 jest.mock('@/lib/supabase/client')
 jest.mock('react-hot-toast', () => ({
-  default: {
-    success: jest.fn(),
-    error: jest.fn(),
-  },
+  success: jest.fn(),
+  error: jest.fn(),
 }))
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
     push: jest.fn(),
     refresh: jest.fn(),
   }),
 }))
+
 jest.mock('@/components/layout/BackButton', () => {
   return function BackButton() {
     return <button>Back</button>
@@ -40,7 +41,7 @@ const mockClient = {
   updated_at: '2024-01-01T00:00:00Z',
 }
 
-const mockSupabaseClient = {
+const createMockSupabaseClient = () => ({
   from: jest.fn(() => ({
     update: jest.fn().mockReturnThis(),
     eq: jest.fn().mockResolvedValue({ error: null }),
@@ -54,11 +55,14 @@ const mockSupabaseClient = {
       }),
     })),
   },
-}
+})
 
 describe('EditClientPage', () => {
+  let mockSupabaseClient: ReturnType<typeof createMockSupabaseClient>
+
   beforeEach(() => {
     jest.clearAllMocks()
+    mockSupabaseClient = createMockSupabaseClient()
     ;(createClient as jest.Mock).mockReturnValue(mockSupabaseClient)
   })
 
@@ -79,7 +83,7 @@ describe('EditClientPage', () => {
     await user.clear(nameInput)
     await user.type(nameInput, 'Jane Doe')
 
-    const submitButton = screen.getByRole('button', { name: /update client/i })
+    const submitButton = screen.getByRole('button', { name: /save changes/i })
     await user.click(submitButton)
 
     await waitFor(() => {
@@ -89,7 +93,7 @@ describe('EditClientPage', () => {
 
   it('should show error message when update fails', async () => {
     const error = { message: 'Failed to update client' }
-    mockSupabaseClient.from = jest.fn(() => ({
+    mockSupabaseClient.from.mockImplementation(() => ({
       update: jest.fn().mockReturnThis(),
       eq: jest.fn().mockResolvedValue({ error }),
     }))
@@ -97,14 +101,11 @@ describe('EditClientPage', () => {
     const user = userEvent.setup()
     render(<EditClientPage client={mockClient} trainerId="trainer-123" />)
 
-    const submitButton = screen.getByRole('button', { name: /update client/i })
+    const submitButton = screen.getByRole('button', { name: /save changes/i })
     await user.click(submitButton)
 
     await waitFor(() => {
       expect(screen.getByText(/failed to update client/i)).toBeInTheDocument()
     })
   })
-
 })
-
-

@@ -112,30 +112,30 @@ export default function InstallPrompt() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-bold text-gray-900 dark:text-slate-100 text-lg mb-1">
-                    Instalar TrainPulse
+                    Install TrainPulse
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-slate-400 mb-4">
-                    Instale o app para acesso rápido e funcionamento offline
+                    Install the app for quick access and offline use
                   </p>
                   <div className="flex gap-2">
                     <button
                       onClick={handleInstall}
                       className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-sm hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg hover:shadow-xl active:scale-95"
                     >
-                      {platform === 'ios' || platform === 'android' ? 'Como instalar' : 'Instalar agora'}
+                      {platform === 'ios' || platform === 'android' ? 'How to install' : 'Install now'}
                     </button>
                     <button
                       onClick={handleDismiss}
                       className="px-4 py-2.5 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 rounded-lg font-medium text-sm hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
                     >
-                      Depois
+                      Later
                     </button>
                   </div>
                 </div>
                 <button
                   onClick={handleDismiss}
                   className="flex-shrink-0 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                  aria-label="Fechar"
+                  aria-label="Close"
                 >
                   <svg
                     className="w-5 h-5 text-gray-500 dark:text-slate-400"
@@ -159,7 +159,7 @@ export default function InstallPrompt() {
                 <button
                   onClick={() => setShowInstructions(false)}
                   className="flex-shrink-0 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
-                  aria-label="Voltar"
+                  aria-label="Back"
                 >
                   <svg
                     className="w-5 h-5 text-gray-500 dark:text-slate-400"
@@ -177,7 +177,7 @@ export default function InstallPrompt() {
                 </button>
                 <div className="flex-1">
                   <h3 className="font-bold text-gray-900 dark:text-slate-100 text-lg mb-3">
-                    {platform === 'ios' ? 'Instalar no iOS' : 'Instalar no Android'}
+                    {platform === 'ios' ? 'Install on iOS' : 'Install on Android'}
                   </h3>
                   {platform === 'ios' ? (
                     <div className="space-y-3 text-sm text-gray-700 dark:text-slate-300">
@@ -185,19 +185,19 @@ export default function InstallPrompt() {
                         <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
                           1
                         </span>
-                        <p>Toque no botão <strong>Compartilhar</strong> <svg className="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg> na barra inferior</p>
+                        <p>Tap the <strong>Share</strong> button <svg className="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92 1.61 0 2.92-1.31 2.92-2.92s-1.31-2.92-2.92-2.92z"/></svg> in the bottom bar</p>
                       </div>
                       <div className="flex gap-3 items-start">
                         <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
                           2
                         </span>
-                        <p>Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong></p>
+                        <p>Scroll down and tap <strong>"Add to Home Screen"</strong></p>
                       </div>
                       <div className="flex gap-3 items-start">
                         <span className="flex-shrink-0 w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
                           3
                         </span>
-                        <p>Toque em <strong>"Adicionar"</strong> para confirmar</p>
+                        <p>Tap <strong>"Add"</strong> to confirm</p>
                       </div>
                     </div>
                   ) : (
@@ -206,19 +206,19 @@ export default function InstallPrompt() {
                         <span className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
                           1
                         </span>
-                        <p>Toque no menu <svg className="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg> no navegador</p>
+                        <p>Tap the menu icon <svg className="inline w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg> in your browser</p>
                       </div>
                       <div className="flex gap-3 items-start">
                         <span className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
                           2
                         </span>
-                        <p>Procure por <strong>"Instalar app"</strong> ou <strong>"Adicionar à tela inicial"</strong></p>
+                        <p>Look for <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong></p>
                       </div>
                       <div className="flex gap-3 items-start">
                         <span className="flex-shrink-0 w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
                           3
                         </span>
-                        <p>Toque para instalar e o app aparecerá na sua tela inicial</p>
+                        <p>Tap to install and the app will appear on your home screen</p>
                       </div>
                     </div>
                   )}
@@ -226,7 +226,7 @@ export default function InstallPrompt() {
                     onClick={handleDismiss}
                     className="mt-4 w-full px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold text-sm hover:from-blue-700 hover:to-purple-700 transition-all shadow-lg"
                   >
-                    Entendi, obrigado!
+                    Got it, thanks!
                   </button>
                 </div>
               </div>
@@ -237,8 +237,3 @@ export default function InstallPrompt() {
     </AnimatePresence>
   )
 }
-
-
-
-
-
