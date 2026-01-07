@@ -9,7 +9,7 @@ export default async function NewWorkoutPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/signin')
+    redirect('/auth')
   }
 
   return <NewWorkoutForm trainerId={user.id} />

@@ -9,7 +9,7 @@ export default async function ClientsPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/signin')
+    redirect('/auth')
   }
 
   return <ClientsContent trainerId={user.id} />

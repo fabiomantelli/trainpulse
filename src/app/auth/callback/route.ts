@@ -54,14 +54,14 @@ export async function GET(request: NextRequest) {
       if (error) {
         console.error('Error exchanging code for session:', error)
         return NextResponse.redirect(
-          new URL(`/auth/signin?error=${encodeURIComponent(error.message)}`, origin)
+          new URL(`/auth?error=${encodeURIComponent(error.message)}`, origin)
         )
       }
 
       if (!data.session) {
         console.error('No session returned from exchangeCodeForSession')
         return NextResponse.redirect(
-          new URL(`/auth/signin?error=${encodeURIComponent('Session could not be established')}`, origin)
+          new URL(`/auth?error=${encodeURIComponent('Session could not be established')}`, origin)
         )
       }
 
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
       
       if (verifyError) {
         return NextResponse.redirect(
-          new URL(`/auth/signin?error=${encodeURIComponent(verifyError.message)}`, origin)
+          new URL(`/auth?error=${encodeURIComponent(verifyError.message)}`, origin)
         )
       }
 
@@ -94,14 +94,14 @@ export async function GET(request: NextRequest) {
     }
 
     // No code, no token, no session - redirect to signin with error
-    const redirectUrl = new URL(`/auth/signin?error=${encodeURIComponent('No authentication code provided. Please click the confirmation link from your email.')}`, origin)
+    const redirectUrl = new URL(`/auth?error=${encodeURIComponent('No authentication code provided. Please click the confirmation link from your email.')}`, origin)
     
     return NextResponse.redirect(redirectUrl)
   } catch (error) {
     console.error('Unexpected error in callback:', error)
     const requestUrl = new URL(request.url)
     return NextResponse.redirect(
-      new URL(`/auth/signin?error=${encodeURIComponent('An unexpected error occurred')}`, requestUrl.origin)
+      new URL(`/auth?error=${encodeURIComponent('An unexpected error occurred')}`, requestUrl.origin)
     )
   }
 }

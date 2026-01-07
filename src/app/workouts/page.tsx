@@ -9,7 +9,7 @@ export default async function WorkoutsPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/signin')
+    redirect('/auth')
   }
 
   return <WorkoutsContent trainerId={user.id} />
