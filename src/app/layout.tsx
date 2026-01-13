@@ -5,9 +5,12 @@ import './globals.css'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import ConditionalLayout from '@/components/layout/ConditionalLayout'
 
+import Script from 'next/script'
+
 const inter = Inter({ subsets: ['latin'] })
 
 const siteUrl = 'https://trainpulse.fit'
+const gaMeasurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-FEPJ19W2DB'
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -114,6 +117,21 @@ export default async function RootLayout({
   return (
     <html lang="en-US" suppressHydrationWarning>
       <head>
+        {/* Google Analytics */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', '${gaMeasurementId}');
+          `}
+        </Script>
+        
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/png" href="/favicon.png" />
         <link rel="shortcut icon" href="/favicon.ico" />
